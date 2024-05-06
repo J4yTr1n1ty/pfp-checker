@@ -1,14 +1,20 @@
 use serenity::builder::*;
 use serenity::model::prelude::*;
 use serenity::{prelude::*, utils::CreateQuickModal};
+use sqlx::{query, SqlitePool};
 
-pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), serenity::Error> {
+pub async fn run(
+    ctx: &Context,
+    interaction: &CommandInteraction,
+    database: &SqlitePool,
+) -> Result<(), serenity::Error> {
     let modal = CreateQuickModal::new("Monitoring request").short_field("User ID to Monitor");
     let response = interaction.quick_modal(ctx, modal).await?.unwrap();
 
     let id = &response.inputs[0];
 
     // TODO: figure out how to add a cron job
+    // query!("INSERT INTO monitorlist (userid) VALUES (?)", id).execute(&database);
 
     response
         .interaction
