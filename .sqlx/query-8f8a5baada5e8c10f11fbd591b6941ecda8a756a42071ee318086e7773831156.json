@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO User (discordId, trackedSince) VALUES (?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "8f8a5baada5e8c10f11fbd591b6941ecda8a756a42071ee318086e7773831156"
+}

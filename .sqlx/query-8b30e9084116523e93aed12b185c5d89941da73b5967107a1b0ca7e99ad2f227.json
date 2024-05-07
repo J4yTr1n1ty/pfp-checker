@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT trackedSince FROM User WHERE discordId = ? LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "trackedSince",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "8b30e9084116523e93aed12b185c5d89941da73b5967107a1b0ca7e99ad2f227"
+}

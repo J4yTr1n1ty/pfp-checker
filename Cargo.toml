@@ -11,3 +11,4 @@ serenity = { version = "0.12", features = ["client", "gateway", "rustls_backend"
 tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
 cronjob = "0.4.17"
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
+chrono = "0.4.38"

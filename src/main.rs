@@ -1,4 +1,5 @@
 mod commands;
+mod util;
 
 use std::env;
 
@@ -19,7 +20,7 @@ impl EventHandler for Handler {
             let content = match command.data.name.as_str() {
                 "ping" => Some(commands::ping::run(&command.data.options())),
                 "monitor" => {
-                    commands::monitor::run(&ctx, &command, &self.database)
+                    commands::monitor::run(&ctx, &command, &self.database, &command.data.options())
                         .await
                         .unwrap();
                     None
@@ -44,7 +45,10 @@ impl EventHandler for Handler {
             &ctx.http,
             vec![commands::ping::register(), commands::monitor::register()],
         )
-        .await;
+        .await
+        .unwrap();
+
+        println!("Updated Global Application Commands");
     }
 }
 
