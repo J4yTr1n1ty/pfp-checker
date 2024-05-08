@@ -1,5 +1,5 @@
-// #[derive(sqlx::Type)]
-// pub struct User {
-//     discordId: i64,
-//     trackedSince: String,
-// }
+pub struct ProfilePictureEntry {
+    pub title: String,
+    pub content: String,
+    pub inline: bool,
+}

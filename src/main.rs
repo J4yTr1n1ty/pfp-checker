@@ -37,6 +37,10 @@ impl EventHandler for Handler {
                     commands::removemonitor::run(&ctx, &command, &self.database, &command.data.options()).await.unwrap();
                     None
                 }
+                "history" => {
+                    commands::history::run(&ctx, &command, &self.database, &command.data.options()).await.unwrap();
+                    None
+                }
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -55,7 +59,7 @@ impl EventHandler for Handler {
 
         let _ = Command::set_global_commands(
             &ctx.http,
-            vec![commands::ping::register(), commands::monitor::register(), commands::removemonitor::register()],
+            vec![commands::ping::register(), commands::monitor::register(), commands::removemonitor::register(), commands::history::register()],
         )
         .await
         .unwrap();
@@ -65,7 +69,7 @@ impl EventHandler for Handler {
         let database_clone = Arc::clone(&self.database);
 
         let update_scheduler = task::spawn(async move {
-            let mut interval = interval(Duration::from_secs(5));
+            let mut interval = interval(Duration::from_secs(30 * 60));
 
             loop {
                 interval.tick().await;
