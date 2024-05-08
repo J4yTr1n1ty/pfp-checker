@@ -1,4 +1,4 @@
-FROM rust:1.78-slim-buster as build
+FROM rust:1.78-buster as build
 
 # create a new empty shell project
 RUN USER=root cargo new --bin pfp-checker
@@ -12,12 +12,16 @@ COPY ./Cargo.toml ./Cargo.toml
 RUN cargo build --release
 RUN rm src/*.rs
 
+# copy your source tree
+COPY ./src ./src
+
+# copy SQL info
+COPY ./migrations ./migrations
+COPY ./.sqlx ./.sqlx
+
 # Install Database CLI and apply migrations
 RUN cargo install sqlx-cli
 RUN sqlx database setup --database-url sqlite:database.sqlite
-
-# copy your source tree
-COPY ./src ./src
 
 # build for release
 RUN rm ./target/release/deps/pfp_checker*
