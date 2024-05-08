@@ -4,3 +4,5 @@ services:
         .
     env_file:
         - .env
+    volumes:
+      - "./database.sqlite:./database.sqlite"
