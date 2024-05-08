@@ -6,11 +6,10 @@ CREATE TABLE User (
 );
 
 CREATE TABLE ProfilePicture (
-  id INTEGER,
+  checksum TEXT,
   userId INTEGER,
   changedAt INTEGER,
   link TEXT,
-  hash TEXT,
-  PRIMARY KEY(id),
+  PRIMARY KEY(checksum, userId),
   FOREIGN KEY(userId) REFERENCES User(discordId)
 );

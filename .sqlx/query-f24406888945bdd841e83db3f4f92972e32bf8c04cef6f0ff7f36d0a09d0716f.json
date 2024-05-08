@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT discordId FROM User",
+  "describe": {
+    "columns": [
+      {
+        "name": "discordId",
+        "ordinal": 0,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f24406888945bdd841e83db3f4f92972e32bf8c04cef6f0ff7f36d0a09d0716f"
+}

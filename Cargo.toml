@@ -12,3 +12,6 @@ tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
 cronjob = "0.4.17"
 sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
 chrono = "0.4.38"
+futures = "0.3.30"
+reqwest = "0.12.4"
+sha1 = "0.10.6"
