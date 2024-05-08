@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM User WHERE discordId = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "1576fdabc387f70b4c72e8ea9273ba56a1230fb5b9bd644238c3d6088a7fafc2"
+}

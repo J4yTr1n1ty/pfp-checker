@@ -11,5 +11,5 @@ CREATE TABLE ProfilePicture (
   changedAt INTEGER,
   link TEXT,
   PRIMARY KEY(checksum, userId),
-  FOREIGN KEY(userId) REFERENCES User(discordId)
+  FOREIGN KEY(userId) REFERENCES User(discordId) ON DELETE CASCADE
 );

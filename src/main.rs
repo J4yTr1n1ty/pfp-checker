@@ -2,6 +2,7 @@ mod commands;
 mod util;
 
 use chrono::{DateTime, Utc};
+use dotenv::dotenv;
 use serenity::all::{Http, UserId};
 use sha1::{Digest, Sha1};
 use std::env;
@@ -32,6 +33,10 @@ impl EventHandler for Handler {
                         .unwrap();
                     None
                 }
+                "removemonitor" => {
+                    commands::removemonitor::run(&ctx, &command, &self.database, &command.data.options()).await.unwrap();
+                    None
+                }
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -50,7 +55,7 @@ impl EventHandler for Handler {
 
         let _ = Command::set_global_commands(
             &ctx.http,
-            vec![commands::ping::register(), commands::monitor::register()],
+            vec![commands::ping::register(), commands::monitor::register(), commands::removemonitor::register()],
         )
         .await
         .unwrap();
@@ -83,8 +88,6 @@ async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
 
             for entry in entries {
                 let user_id = UserId::new(entry.discordId.try_into().unwrap());
-
-                println!("Updating {}", entry.discordId);
 
                 let user = user_id
                     .to_user(client)
@@ -120,6 +123,8 @@ async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
                         let dt: DateTime<Utc> = now.clone().into();
                         let timestamp = dt.timestamp();
 
+                        println!("Writing new pfp for {} at {} with checksum {}", entry.discordId, dt.to_rfc2822(), checksum);
+
                         sqlx::query!(
                             "INSERT INTO ProfilePicture (checksum, userId, changedAt, link) VALUES (?, ?, ?, ?)", 
                             checksum, 
@@ -138,6 +143,8 @@ async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok(); // load all environment variables from the .env file
+
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 

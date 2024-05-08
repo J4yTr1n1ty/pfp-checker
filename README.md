@@ -9,11 +9,10 @@ A Discord bot to provide a Profile Picture checker to see how many times someone
 - Shows the history of profile pictures
 - Shows the amount of changes since starting to monitor, changes per month/week/year
 
-
 ## ToDos
 - [x] Add Database integration with local SQLite Database (https://github.com/serenity-rs/serenity/tree/current/examples/e16_sqlite_database)
 - [x] Add Cronjob to monitor Users (https://docs.rs/cronjob/latest/cronjob/)
-- [ ] Add Remove Monitor Command
+- [x] Add Remove Monitor Command
 - [ ] Add History Command
     - Previous Profile Pictures
     - Duration of usage
