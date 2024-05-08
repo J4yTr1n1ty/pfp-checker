@@ -12,7 +12,7 @@ A Discord bot to provide a Profile Picture checker to see how many times someone
 
 ## ToDos
 - [x] Add Database integration with local SQLite Database (https://github.com/serenity-rs/serenity/tree/current/examples/e16_sqlite_database)
-- [ ] Add Cronjob to monitor Users (https://docs.rs/cronjob/latest/cronjob/)
+- [x] Add Cronjob to monitor Users (https://docs.rs/cronjob/latest/cronjob/)
 - [ ] Add Remove Monitor Command
 - [ ] Add History Command
     - Previous Profile Pictures
