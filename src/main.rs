@@ -31,6 +31,7 @@ impl EventHandler for Handler {
                     commands::monitor::run(&ctx, &command, &self.database, &command.data.options())
                         .await
                         .unwrap();
+                    update_monitored_users(&ctx.http, &self.database).await;
                     None
                 }
                 "removemonitor" => {
