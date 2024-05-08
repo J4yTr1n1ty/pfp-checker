@@ -12,6 +12,10 @@ COPY ./Cargo.toml ./Cargo.toml
 RUN cargo build --release
 RUN rm src/*.rs
 
+# Install Database CLI and apply migrations
+RUN cargo install sqlx-cli
+RUN sqlx database setup
+
 # copy your source tree
 COPY ./src ./src
 
