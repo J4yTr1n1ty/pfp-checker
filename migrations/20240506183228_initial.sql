@@ -8,6 +8,7 @@ CREATE TABLE User (
 CREATE TABLE ProfilePicture (
   id INTEGER,
   userId INTEGER,
+  changedAt INTEGER,
   link TEXT,
   hash TEXT,
   PRIMARY KEY(id),
