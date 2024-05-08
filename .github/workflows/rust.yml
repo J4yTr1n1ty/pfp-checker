@@ -20,6 +20,6 @@ jobs:
     - name: Install Database CLI
       run: cargo install sqlx-cli
     - name: Database Migration
-      run: sqlx database setup
+      run: sqlx database setup --database-url sqlite:database.sqlite
     - name: Run tests
       run: cargo test --verbose

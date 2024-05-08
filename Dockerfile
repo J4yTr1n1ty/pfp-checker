@@ -14,7 +14,7 @@ RUN rm src/*.rs
 
 # Install Database CLI and apply migrations
 RUN cargo install sqlx-cli
-RUN sqlx database setup
+RUN sqlx database setup --database-url sqlite:database.sqlite
 
 # copy your source tree
 COPY ./src ./src
