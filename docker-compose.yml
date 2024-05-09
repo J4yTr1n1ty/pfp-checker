@@ -1,7 +1,8 @@
+version: '3.8'
 services:
   discord-bot:
-    build:
-        .
+    build: .
+    container_name: pfp_spy
     env_file:
         - .env
     volumes:

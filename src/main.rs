@@ -70,7 +70,7 @@ impl EventHandler for Handler {
         let database_clone = Arc::clone(&self.database);
 
         let update_scheduler = task::spawn(async move {
-            let mut interval = interval(Duration::from_secs(30 * 60));
+            let mut interval = interval(Duration::from_secs(30));
 
             loop {
                 interval.tick().await;
@@ -92,7 +92,10 @@ async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
             println!("Updating {} accounts...", entries.len());
 
             for entry in entries {
+                println!("Trying to parse {}", entry.discordId);
                 let user_id = UserId::new(entry.discordId.try_into().unwrap());
+
+                println!("Updating {user_id}...");
 
                 let user = user_id
                     .to_user(client)
@@ -121,7 +124,7 @@ async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
 
                 match already_existing_record {
                     Some(_) => {
-                        return; // Same profile picture, no change needed.
+                        continue;
                     }
                     None => {
                         let now = SystemTime::now();

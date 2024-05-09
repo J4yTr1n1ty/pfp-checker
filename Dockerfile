@@ -18,6 +18,7 @@ COPY ./src ./src
 # copy SQL info
 COPY ./migrations ./migrations
 COPY ./.sqlx ./.sqlx
+COPY ./database.sqlite ./database.sqlite
 
 # Install Database CLI and apply migrations
 RUN cargo install sqlx-cli
