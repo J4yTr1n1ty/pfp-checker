@@ -70,7 +70,7 @@ impl EventHandler for Handler {
         let database_clone = Arc::clone(&self.database);
 
         let update_scheduler = task::spawn(async move {
-            let mut interval = interval(Duration::from_secs(30));
+            let mut interval = interval(Duration::from_secs(30 * 60));
 
             loop {
                 interval.tick().await;
