@@ -4,6 +4,8 @@ use chrono::{DateTime, Utc};
 use serenity::all::{Http, UserId};
 use sha1::{Sha1, Digest};
 
+use crate::util::uploader::upload_image_to_img_bb;
+
 pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
     let users_to_check = sqlx::query!("SELECT discordId FROM User")
         .fetch_all(database)
@@ -14,7 +16,6 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
             println!("Updating {} accounts...", entries.len());
 
             for entry in entries {
-                println!("Trying to parse {}", entry.discordId);
                 let user_id = UserId::new(entry.discordId.try_into().unwrap());
 
                 println!("Updating {user_id}...");
@@ -55,12 +56,14 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
 
                         println!("Writing new pfp for {} at {} with checksum {}", entry.discordId, dt.to_rfc2822(), checksum);
 
+                        let image_url = upload_image_to_img_bb(bytes.to_vec()).await.unwrap();
+
                         sqlx::query!(
                             "INSERT INTO ProfilePicture (checksum, userId, changedAt, link) VALUES (?, ?, ?, ?)", 
                             checksum, 
                             entry.discordId, 
                             timestamp, 
-                            avatar_url).execute(database).await.unwrap();
+                            image_url).execute(database).await.unwrap();
                     }
                 }
             }
