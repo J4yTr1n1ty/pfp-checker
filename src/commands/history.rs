@@ -48,7 +48,7 @@ pub async fn run(
                                     dt.timestamp()
                                 ),
                                 content: format!(
-                                    "Link: {}\nChecksum: {}",
+                                    "Link: [Look at the previous picture]({})\nChecksum: {}",
                                     entry.link.unwrap(),
                                     entry.checksum.unwrap()
                                 ),
