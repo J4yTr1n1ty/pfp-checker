@@ -47,6 +47,12 @@ impl EventHandler for Handler {
                         .unwrap();
                     None
                 }
+                "stats" => {
+                    commands::stats::run(&ctx, &command, &self.database, &command.data.options())
+                        .await
+                        .unwrap();
+                    None
+                }
                 _ => Some("not implemented :(".to_string()),
             };
 
@@ -70,6 +76,7 @@ impl EventHandler for Handler {
                 commands::monitor::register(),
                 commands::removemonitor::register(),
                 commands::history::register(),
+                commands::stats::register(),
             ],
         )
         .await
