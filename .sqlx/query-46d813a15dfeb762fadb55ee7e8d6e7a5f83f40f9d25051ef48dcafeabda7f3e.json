@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM User WHERE discordId = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "discordId",
+        "ordinal": 0,
+        "type_info": "Int64"
+      },
+      {
+        "name": "trackedSince",
+        "ordinal": 1,
+        "type_info": "Int64"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "46d813a15dfeb762fadb55ee7e8d6e7a5f83f40f9d25051ef48dcafeabda7f3e"
+}
