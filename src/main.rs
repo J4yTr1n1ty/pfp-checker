@@ -53,7 +53,7 @@ impl EventHandler for Handler {
                         .unwrap();
                     None
                 }
-                _ => Some("not implemented :(".to_string()),
+                _ => Some(format!("{} is not implemented :(", command.data.name)),
             };
 
             if let Some(content) = content {
