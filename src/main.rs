@@ -47,7 +47,13 @@ impl EventHandler for Handler {
                         .unwrap();
                     None
                 }
-                _ => Some("not implemented :(".to_string()),
+                "stats" => {
+                    commands::stats::run(&ctx, &command, &self.database, &command.data.options())
+                        .await
+                        .unwrap();
+                    None
+                }
+                _ => Some(format!("{} is not implemented :(", command.data.name)),
             };
 
             if let Some(content) = content {
@@ -70,6 +76,7 @@ impl EventHandler for Handler {
                 commands::monitor::register(),
                 commands::removemonitor::register(),
                 commands::history::register(),
+                commands::stats::register(),
             ],
         )
         .await
