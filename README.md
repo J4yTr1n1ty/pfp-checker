@@ -21,7 +21,7 @@ This is a Discord bot to provide a Profile Picture History to see how many times
     - [x] Previous Profile Pictures
 
 ### v0.3.0
-- [ ] Add Stats Command
-    - Amount of changes since monitor
-    - Start of Monitor
-    - Average changes per week, month and year
+- [x] Add Stats Command
+    - [x] Amount of changes since monitor
+    - [x] Start of Monitor
+    - [x] Average changes per week, month and year
