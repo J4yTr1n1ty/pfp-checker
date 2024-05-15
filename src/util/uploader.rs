@@ -2,7 +2,10 @@ use reqwest::{multipart, Client};
 
 use super::objects::ImgBBResponse;
 
-pub async fn upload_image_to_img_bb(image_data: Vec<u8>) -> Result<String, reqwest::Error> {
+pub async fn upload_image_to_img_bb(
+    image_data: Vec<u8>,
+    user_id: i64,
+) -> Result<String, reqwest::Error> {
     let api_key = std::env::var("IMGBB_KEY").expect("ImgBB API Key must be set.");
 
     let client = Client::new();
@@ -10,7 +13,7 @@ pub async fn upload_image_to_img_bb(image_data: Vec<u8>) -> Result<String, reqwe
     let link = format!("https://api.imgbb.com/1/upload?key={}", api_key);
 
     let part = multipart::Part::bytes(image_data)
-        .file_name("pfp.png")
+        .file_name(format!("pfp_{}.png", user_id))
         .mime_str("image/png")
         .unwrap();
 

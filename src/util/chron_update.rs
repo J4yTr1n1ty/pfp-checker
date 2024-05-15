@@ -56,7 +56,7 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
 
                         println!("Writing new pfp for {} at {} with checksum {}", entry.discordId, dt.to_rfc2822(), checksum);
 
-                        let image_url = upload_image_to_img_bb(bytes.to_vec()).await.unwrap();
+                        let image_url = upload_image_to_img_bb(bytes.to_vec(), entry.discordId).await.unwrap();
 
                         sqlx::query!(
                             "INSERT INTO ProfilePicture (checksum, userId, changedAt, link) VALUES (?, ?, ?, ?)", 
