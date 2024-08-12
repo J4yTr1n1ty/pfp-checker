@@ -65,14 +65,27 @@ pub async fn run(
                             .title(format!("Profile Picture History of {}", user.tag()))
                             .fields(
                                 pfps.into_iter()
+                                    .take(10)
                                     .map(|entry| (entry.title, entry.content, entry.inline)),
                             );
+
+                        let back_button = CreateButton::new("history_back")
+                            .label("Back")
+                            .disabled(true)
+                            .style(ButtonStyle::Primary);
+
+                        let more_button = CreateButton::new("history_more")
+                            .label("More")
+                            .style(ButtonStyle::Primary);
 
                         interaction
                             .create_response(
                                 &ctx.http,
                                 CreateInteractionResponse::Message(
-                                    CreateInteractionResponseMessage::new().embed(embed),
+                                    CreateInteractionResponseMessage::new()
+                                        .embed(embed)
+                                        .button(back_button)
+                                        .button(more_button),
                                 ),
                             )
                             .await
