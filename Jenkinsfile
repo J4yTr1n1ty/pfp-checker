@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Verify cargo installation') {
       steps {
-        sh 'source $HOME/.cargo/env'
+        sh '. "$HOME/.cargo/env"'
         sh 'cargo --version'
       }
     }
