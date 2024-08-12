@@ -56,6 +56,10 @@ impl EventHandler for Handler {
                 _ => Some(format!("{} is not implemented :(", command.data.name)),
             };
 
+            if let Interaction::Component(component) = interaction {
+                if let Some(custom_id) = component.data.custom_id {}
+            }
+
             if let Some(content) = content {
                 let data = CreateInteractionResponseMessage::new().content(content);
                 let builder = CreateInteractionResponse::Message(data);
