@@ -7,6 +7,8 @@ use sqlx::SqlitePool;
 
 use crate::util::objects::ProfilePictureEntry;
 
+const ENTRIES_PER_PAGE: usize = 10;
+
 pub async fn run(
     ctx: &Context,
     interaction: &CommandInteraction,
@@ -18,8 +20,7 @@ pub async fn run(
         ..
     }) = options.first()
     {
-        let user_id = i64::from(user.id); // Need to cast until I figure out how to implement the
-                                          // trait for sqlx.
+        let user_id = i64::from(user.id);
 
         let user = sqlx::query!("SELECT discordId FROM User WHERE discordId = ?", user_id)
             .fetch_one(database)
@@ -36,60 +37,32 @@ pub async fn run(
                     Ok(entries) => {
                         let user = UserId::new(user_id.try_into().expect("Invalid User ID"));
                         let user = user.to_user(&ctx.http).await.unwrap();
-                        let mut pfps: Vec<ProfilePictureEntry> = Vec::new();
-
-                        for entry in entries {
-                            let tracking_start_date = entry.changedAt.unwrap() as i64;
-                            let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
-
-                            pfps.push(ProfilePictureEntry {
-                                title: format!(
-                                    "Profile Picture first recorded <t:{}:R>",
-                                    dt.timestamp()
-                                ),
-                                content: format!(
-                                    "Link: [Look at the previous picture]({})\nChecksum: {}",
-                                    entry.link.unwrap(),
-                                    entry.checksum.unwrap()
-                                ),
-                                inline: false,
+                        let pfps: Vec<ProfilePictureEntry> = entries
+                            .into_iter()
+                            .map(|entry| {
+                                let tracking_start_date = entry.changedAt.unwrap() as i64;
+                                let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
+                                ProfilePictureEntry {
+                                    title: format!(
+                                        "Profile Picture first recorded <t:{}:R>",
+                                        dt.timestamp()
+                                    ),
+                                    content: format!(
+                                        "Link: [Look at the previous picture]({})\nChecksum: {}",
+                                        entry.link.unwrap(),
+                                        entry.checksum.unwrap()
+                                    ),
+                                    inline: false,
+                                }
                             })
-                        }
+                            .collect();
 
                         if pfps.is_empty() {
-                            interaction.create_response(&ctx.http, CreateInteractionResponse::Message(CreateInteractionResponseMessage::new().content("No Profile picture entries found. Please check back in about 30 minutes."))).await.unwrap();
+                            interaction.create_response(&ctx.http, CreateInteractionResponse::Message(CreateInteractionResponseMessage::new().content("No Profile picture entries found. Please check back in about 30 minutes."))).await?;
                             return Ok(());
                         }
 
-                        let embed = CreateEmbed::new()
-                            .title(format!("Profile Picture History of {}", user.tag()))
-                            .fields(
-                                pfps.into_iter()
-                                    .take(10)
-                                    .map(|entry| (entry.title, entry.content, entry.inline)),
-                            );
-
-                        let back_button = CreateButton::new("history_back")
-                            .label("Back")
-                            .disabled(true)
-                            .style(ButtonStyle::Primary);
-
-                        let more_button = CreateButton::new("history_more")
-                            .label("More")
-                            .style(ButtonStyle::Primary);
-
-                        interaction
-                            .create_response(
-                                &ctx.http,
-                                CreateInteractionResponse::Message(
-                                    CreateInteractionResponseMessage::new()
-                                        .embed(embed)
-                                        .button(back_button)
-                                        .button(more_button),
-                                ),
-                            )
-                            .await
-                            .unwrap();
+                        send_paginated_response(ctx, interaction, &user, &pfps, 0).await?;
                     }
                     Err(_) => {
                         let embed = CreateEmbed::new()
@@ -109,12 +82,9 @@ pub async fn run(
                                     CreateInteractionResponseMessage::new().embed(embed),
                                 ),
                             )
-                            .await
-                            .unwrap();
+                            .await?;
                     }
                 }
-
-                return Ok(());
             }
             Err(_) => {
                 let embed = CreateEmbed::new()
@@ -134,13 +104,68 @@ pub async fn run(
                             CreateInteractionResponseMessage::new().embed(embed),
                         ),
                     )
-                    .await
-                    .unwrap();
+                    .await?;
             }
         }
     }
 
-    return Ok(());
+    Ok(())
+}
+
+pub async fn get_paginated_embed_response(
+    user: &User,
+    pfps: &[ProfilePictureEntry],
+    page: usize,
+) -> Result<CreateInteractionResponse, serenity::Error> {
+    let total_pages = (pfps.len() as f32 / ENTRIES_PER_PAGE as f32).ceil() as usize;
+    let start = page * ENTRIES_PER_PAGE;
+    let end = (start + ENTRIES_PER_PAGE).min(pfps.len());
+
+    let embed = CreateEmbed::new()
+        .title(format!("Profile Picture History of {}", user.tag()))
+        .fields(
+            pfps[start..end]
+                .iter()
+                .map(|entry| (entry.title.clone(), entry.content.clone(), entry.inline)),
+        )
+        .footer(CreateEmbedFooter::new(format!(
+            "Page {} of {}",
+            page + 1,
+            total_pages
+        )));
+
+    let components = CreateActionRow::Buttons(vec![
+        CreateButton::new(format!("history_back_{}_{}", page, user.id))
+            .label("Back")
+            .style(ButtonStyle::Primary)
+            .disabled(page == 0),
+        CreateButton::new(format!("history_next_{}_{}", page, user.id))
+            .label("Next")
+            .style(ButtonStyle::Primary)
+            .disabled(end == pfps.len()),
+    ]);
+
+    return Ok(CreateInteractionResponse::Message(
+        CreateInteractionResponseMessage::new()
+            .embed(embed)
+            .components(vec![components]),
+    ));
+}
+
+pub async fn send_paginated_response(
+    ctx: &Context,
+    interaction: &CommandInteraction,
+    user: &User,
+    pfps: &[ProfilePictureEntry],
+    page: usize,
+) -> Result<(), serenity::Error> {
+    let response = get_paginated_embed_response(user, pfps, page)
+        .await
+        .unwrap();
+
+    interaction.create_response(&ctx.http, response).await?;
+
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {
