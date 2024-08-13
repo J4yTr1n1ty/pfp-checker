@@ -36,7 +36,7 @@ pub async fn run(
                 match profile_pictures {
                     Ok(entries) => {
                         let user = UserId::new(user_id.try_into().expect("Invalid User ID"));
-                        let user = user.to_user(&ctx.http).await.unwrap();
+                        let user = user.to_user(&ctx.http).await?;
                         let pfps: Vec<ProfilePictureEntry> = entries
                             .into_iter()
                             .map(|entry| {

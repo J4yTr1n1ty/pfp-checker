@@ -1,5 +1,8 @@
 pipeline {
   agent any
+  options {
+    cache(path: 'target', key: 'rust-cache')
+  }
   stages {
     stage('Verify cargo installation') {
       steps {
