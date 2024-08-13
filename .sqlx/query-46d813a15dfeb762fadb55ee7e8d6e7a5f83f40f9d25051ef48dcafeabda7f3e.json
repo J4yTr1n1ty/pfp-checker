@@ -6,12 +6,12 @@
       {
         "name": "discordId",
         "ordinal": 0,
-        "type_info": "Int64"
+        "type_info": "Integer"
       },
       {
         "name": "trackedSince",
         "ordinal": 1,
-        "type_info": "Int64"
+        "type_info": "Integer"
       }
     ],
     "parameters": {
