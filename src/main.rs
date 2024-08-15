@@ -84,6 +84,7 @@ impl EventHandler for Handler {
             }
             Interaction::Component(component) => {
                 let custom_id = &component.data.custom_id;
+                let mut sender_message = component.message;
                 if custom_id.starts_with("history_") {
                     let parts: Vec<&str> = custom_id.split('_').collect();
                     if parts.len() == 4 {
@@ -102,14 +103,19 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let response =
-                            commands::history::get_paginated_embed_response(&user, &pfps, new_page)
-                                .await
-                                .unwrap();
+                        let response = commands::history::get_paginated_embed_edit_response(
+                            &user, &pfps, new_page,
+                        )
+                        .await
+                        .unwrap();
 
-                        if let Err(why) = component.create_response(&ctx.http, response).await {
+                        if let Err(why) = sender_message.edit(&ctx.http, response).await {
                             println!("Cannot respond to slash command: {why}");
                         }
+
+                        //if let Err(why) = component.create_response(&ctx.http, response).await {
+                        //    println!("Cannot respond to slash command: {why}");
+                        //}
                     }
                 }
             }
