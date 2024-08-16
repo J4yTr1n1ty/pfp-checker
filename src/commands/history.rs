@@ -112,6 +112,42 @@ pub async fn run(
     Ok(())
 }
 
+pub async fn get_paginated_embed_edit_response(
+    user: &User,
+    pfps: &[ProfilePictureEntry],
+    page: usize,
+) -> Result<EditMessage, serenity::Error> {
+    let total_pages = (pfps.len() as f32 / ENTRIES_PER_PAGE as f32).ceil() as usize;
+    let start = page * ENTRIES_PER_PAGE;
+    let end = (start + ENTRIES_PER_PAGE).min(pfps.len());
+
+    let embed = CreateEmbed::new()
+        .title(format!("Profile Picture History of {}", user.tag()))
+        .fields(
+            pfps[start..end]
+                .iter()
+                .map(|entry| (entry.title.clone(), entry.content.clone(), entry.inline)),
+        )
+        .footer(CreateEmbedFooter::new(format!(
+            "Page {} of {}",
+            page + 1,
+            total_pages
+        )));
+
+    let components = CreateActionRow::Buttons(vec![
+        CreateButton::new(format!("history_back_{}_{}", page, user.id))
+            .label("Back")
+            .style(ButtonStyle::Primary)
+            .disabled(page == 0),
+        CreateButton::new(format!("history_next_{}_{}", page, user.id))
+            .label("Next")
+            .style(ButtonStyle::Primary)
+            .disabled(end == pfps.len()),
+    ]);
+
+    return Ok(EditMessage::new().embed(embed).components(vec![components]));
+}
+
 pub async fn get_paginated_embed_response(
     user: &User,
     pfps: &[ProfilePictureEntry],
