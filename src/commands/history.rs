@@ -7,7 +7,7 @@ use sqlx::SqlitePool;
 
 use crate::util::objects::ProfilePictureEntry;
 
-const ENTRIES_PER_PAGE: usize = 1;
+const ENTRIES_PER_PAGE: usize = 10;
 
 pub async fn run(
     ctx: &Context,
