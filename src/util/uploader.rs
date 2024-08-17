@@ -12,8 +12,10 @@ pub async fn upload_image_to_img_bb(
 
     let link = format!("https://api.imgbb.com/1/upload?key={}", api_key);
 
+    let timestamp = chrono::Utc::now().timestamp();
+
     let part = multipart::Part::bytes(image_data)
-        .file_name(format!("pfp_{}.png", user_id))
+        .file_name(format!("pfp_{}_{}.png", user_id, timestamp))
         .mime_str("image/png")
         .unwrap();
 
