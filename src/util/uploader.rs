@@ -33,7 +33,6 @@ pub async fn upload_image_to_img_bb(
         let imgbb_response: ImgBBResponse = serde_json::from_str(&body).unwrap();
         Ok(imgbb_response.data.url)
     } else {
-        // TODO: queue failed uploads
         Err(response.error_for_status().err().unwrap())
     }
 }
