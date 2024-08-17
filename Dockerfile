@@ -1,37 +1,42 @@
-FROM rust:1.78-buster as build
+# Stage 1: Build the Rust project
+FROM rust:latest AS builder
 
-# create a new empty shell project
+# Install dependencies required for sqlx
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libssl-dev \
+    pkg-config \
+    openssl
+
+# Create a new empty shell project
 RUN USER=root cargo new --bin pfp-checker
 WORKDIR /pfp-checker
 
-# copy over your manifests
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
+# Copy the Cargo.toml and Cargo.lock files
+COPY Cargo.toml Cargo.lock ./
 
-# this build step will cache your dependencies
-RUN cargo build --release
-RUN rm src/*.rs
-
-# copy your source tree
-COPY ./src ./src
-
-# copy SQL info
-COPY ./migrations ./migrations
-COPY ./.sqlx ./.sqlx
-COPY ./database.sqlite ./database.sqlite
-
-# Install Database CLI and apply migrations
-RUN cargo install sqlx-cli
-RUN sqlx database setup --database-url sqlite:database.sqlite
-
-# build for release
-RUN rm ./target/release/deps/pfp_checker*
+# Build dependencies (this is done to cache dependencies separately from the app code)
 RUN cargo build --release
 
-FROM rust:1.78-slim-buster
+# Copy the rest of the source code
+COPY . .
 
-# copy the build artifact from the build stage
-COPY --from=build /pfp-checker/target/release/pfp-checker .
+# If you are using sqlx offline mode (recommended for production), run:
+RUN cargo sqlx prepare -- --lib
+RUN cargo build --release
 
-# set the startup command to run your binary
-CMD ["./pfp-checker"]
+# Stage 2: Create a smaller image with only the compiled binary
+FROM debian:buster-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libssl1.1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the compiled binary from the builder stage
+COPY --from=builder /pfp-checker/target/release/pfp-checker /usr/local/bin/pfp-checker
+
+# Set the binary as the entry point
+ENTRYPOINT ["pfp-checker"]
