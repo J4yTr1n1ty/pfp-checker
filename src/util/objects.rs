@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-pub struct ProfilePictureEntry {
+pub struct EmbedEntry {
     pub title: String,
     pub content: String,
     pub inline: bool,

@@ -49,8 +49,19 @@ impl EventHandler for Handler {
                         .unwrap();
                         None
                     }
-                    "history" => {
-                        commands::history::run(
+                    "pfphistory" => {
+                        commands::pfphistory::run(
+                            &ctx,
+                            &command,
+                            &self.database,
+                            &command.data.options(),
+                        )
+                        .await
+                        .unwrap();
+                        None
+                    }
+                    "usernamehistory" => {
+                        commands::usernamehistory::run(
                             &ctx,
                             &command,
                             &self.database,
@@ -85,7 +96,7 @@ impl EventHandler for Handler {
             Interaction::Component(component) => {
                 let custom_id = &component.data.custom_id;
                 let mut sender_message = component.message.to_owned();
-                if custom_id.starts_with("history_") {
+                if custom_id.starts_with("pfphistory_") {
                     let parts: Vec<&str> = custom_id.split('_').collect();
                     if parts.len() == 4 {
                         let direction = parts[1];
@@ -103,11 +114,49 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let response = commands::history::get_paginated_embed_edit_response(
+                        let response = commands::pfphistory::get_paginated_embed_edit_response(
                             &user, &pfps, new_page,
                         )
                         .await
                         .unwrap();
+
+                        if let Err(why) = component
+                            .create_response(&ctx.http, CreateInteractionResponse::Acknowledge)
+                            .await
+                        {
+                            println!("Cannot respond to slash command: {why}")
+                        }
+
+                        if let Err(why) = sender_message.edit(&ctx.http, response).await {
+                            println!("Cannot respond to slash command: {why}");
+                        }
+                    }
+                }
+
+                if custom_id.starts_with("usernamehistory_") {
+                    let parts: Vec<&str> = custom_id.split('_').collect();
+                    if parts.len() == 4 {
+                        let direction = parts[1];
+                        let current_page: usize = parts[2].parse().unwrap_or(0);
+                        let new_page = match direction {
+                            "back" => current_page.saturating_sub(1),
+                            "next" => current_page + 1,
+                            _ => current_page,
+                        };
+
+                        // Fetch the user and pfps data again
+                        let user_id = parts[3].parse::<UserId>().unwrap();
+                        let user = user_id.to_user(&ctx.http).await.unwrap();
+                        let pfps = fetch_usernames(&self.database, i64::from(user_id))
+                            .await
+                            .unwrap();
+
+                        let response =
+                            commands::usernamehistory::get_paginated_embed_edit_response(
+                                &user, &pfps, new_page,
+                            )
+                            .await
+                            .unwrap();
 
                         if let Err(why) = component
                             .create_response(&ctx.http, CreateInteractionResponse::Acknowledge)
@@ -135,7 +184,8 @@ impl EventHandler for Handler {
                 commands::ping::register(),
                 commands::monitor::register(),
                 commands::removemonitor::register(),
-                commands::history::register(),
+                commands::pfphistory::register(),
+                commands::usernamehistory::register(),
                 commands::stats::register(),
             ],
         )
@@ -159,10 +209,32 @@ impl EventHandler for Handler {
     }
 }
 
+async fn fetch_usernames(
+    database: &sqlx::SqlitePool,
+    user_id: i64,
+) -> Result<Vec<objects::EmbedEntry>, sqlx::Error> {
+    let entries = sqlx::query!("SELECT * FROM UsernameChange WHERE userId = ?", user_id)
+        .fetch_all(database)
+        .await?;
+
+    Ok(entries
+        .into_iter()
+        .map(|entry| {
+            let tracking_start_date = entry.changedAt.unwrap() as i64;
+            let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0).unwrap();
+            objects::EmbedEntry {
+                title: format!("Username first recorded <t:{}:R>", dt.timestamp()),
+                content: format!("{}", entry.username.unwrap()),
+                inline: false,
+            }
+        })
+        .collect())
+}
+
 async fn fetch_profile_pictures(
     database: &sqlx::SqlitePool,
     user_id: i64,
-) -> Result<Vec<objects::ProfilePictureEntry>, sqlx::Error> {
+) -> Result<Vec<objects::EmbedEntry>, sqlx::Error> {
     let entries = sqlx::query!("SELECT * FROM ProfilePicture WHERE userId = ?", user_id)
         .fetch_all(database)
         .await?;
@@ -172,7 +244,7 @@ async fn fetch_profile_pictures(
         .map(|entry| {
             let tracking_start_date = entry.changedAt.unwrap() as i64;
             let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0).unwrap();
-            objects::ProfilePictureEntry {
+            objects::EmbedEntry {
                 title: format!("Profile Picture first recorded <t:{}:R>", dt.timestamp()),
                 content: format!(
                     "Link: [Look at the previous picture]({})\nChecksum: {}",

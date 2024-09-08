@@ -5,9 +5,9 @@ use serenity::prelude::*;
 
 use sqlx::SqlitePool;
 
-use crate::util::objects::ProfilePictureEntry;
+use crate::util::objects::EmbedEntry;
 
-const ENTRIES_PER_PAGE: usize = 10;
+const ENTRIES_PER_PAGE: usize = 2;
 
 pub async fn run(
     ctx: &Context,
@@ -37,12 +37,12 @@ pub async fn run(
                     Ok(entries) => {
                         let user = UserId::new(user_id.try_into().expect("Invalid User ID"));
                         let user = user.to_user(&ctx.http).await?;
-                        let pfps: Vec<ProfilePictureEntry> = entries
+                        let pfps: Vec<EmbedEntry> = entries
                             .into_iter()
                             .map(|entry| {
                                 let tracking_start_date = entry.changedAt.unwrap() as i64;
                                 let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
-                                ProfilePictureEntry {
+                                EmbedEntry {
                                     title: format!(
                                         "Profile Picture first recorded <t:{}:R>",
                                         dt.timestamp()
@@ -114,7 +114,7 @@ pub async fn run(
 
 pub async fn get_paginated_embed_edit_response(
     user: &User,
-    pfps: &[ProfilePictureEntry],
+    pfps: &[EmbedEntry],
     page: usize,
 ) -> Result<EditMessage, serenity::Error> {
     let total_pages = (pfps.len() as f32 / ENTRIES_PER_PAGE as f32).ceil() as usize;
@@ -135,11 +135,11 @@ pub async fn get_paginated_embed_edit_response(
         )));
 
     let components = CreateActionRow::Buttons(vec![
-        CreateButton::new(format!("history_back_{}_{}", page, user.id))
+        CreateButton::new(format!("pfphistory_back_{}_{}", page, user.id))
             .label("Back")
             .style(ButtonStyle::Primary)
             .disabled(page == 0),
-        CreateButton::new(format!("history_next_{}_{}", page, user.id))
+        CreateButton::new(format!("pfphistory_next_{}_{}", page, user.id))
             .label("Next")
             .style(ButtonStyle::Primary)
             .disabled(end == pfps.len()),
@@ -150,7 +150,7 @@ pub async fn get_paginated_embed_edit_response(
 
 pub async fn get_paginated_embed_response(
     user: &User,
-    pfps: &[ProfilePictureEntry],
+    pfps: &[EmbedEntry],
     page: usize,
 ) -> Result<CreateInteractionResponse, serenity::Error> {
     let total_pages = (pfps.len() as f32 / ENTRIES_PER_PAGE as f32).ceil() as usize;
@@ -171,11 +171,11 @@ pub async fn get_paginated_embed_response(
         )));
 
     let components = CreateActionRow::Buttons(vec![
-        CreateButton::new(format!("history_back_{}_{}", page, user.id))
+        CreateButton::new(format!("pfphistory_back_{}_{}", page, user.id))
             .label("Back")
             .style(ButtonStyle::Primary)
             .disabled(page == 0),
-        CreateButton::new(format!("history_next_{}_{}", page, user.id))
+        CreateButton::new(format!("pfphistory_next_{}_{}", page, user.id))
             .label("Next")
             .style(ButtonStyle::Primary)
             .disabled(end == pfps.len()),
@@ -192,7 +192,7 @@ pub async fn send_paginated_response(
     ctx: &Context,
     interaction: &CommandInteraction,
     user: &User,
-    pfps: &[ProfilePictureEntry],
+    pfps: &[EmbedEntry],
     page: usize,
 ) -> Result<(), serenity::Error> {
     let response = get_paginated_embed_response(user, pfps, page)
@@ -205,8 +205,8 @@ pub async fn send_paginated_response(
 }
 
 pub fn register() -> CreateCommand {
-    CreateCommand::new("history")
-        .description("Shows the history for a specified user.")
+    CreateCommand::new("pfphistory")
+        .description("Shows the history of profile pictures for a specified user.")
         .add_option(
             CreateCommandOption::new(
                 serenity::all::CommandOptionType::User,
