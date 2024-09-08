@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT username FROM UsernameChange WHERE username = ? AND userId = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "username",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "2a2726a8a44f8599c8e6527220cf12efaa562fbb7f3ad8a29ef5d35e90ee7ef5"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM UsernameChange WHERE userId = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "userId",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "changedAt",
+        "ordinal": 1,
+        "type_info": "Integer"
+      },
+      {
+        "name": "username",
+        "ordinal": 2,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "8d77555f065d43eb2375bfc7dd0f8cec9cbe6e6827f3da1efac803f0bdb4a44a"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO UsernameChange (changedAt, username, userId) VALUES (?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "068268db359a585a4eb56a6cd3014d64832fd0110ee780dc8397dea8102f276b"
+}
