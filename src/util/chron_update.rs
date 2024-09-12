@@ -18,12 +18,14 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
             for entry in entries {
                 let user_id = UserId::new(entry.discordId.try_into().unwrap());
 
-                println!("Updating {user_id}...");
-
                 let user = user_id
                     .to_user(client)
                     .await
                     .expect(&format!("Unable to retrieve User {}", entry.discordId).to_string());
+
+                let tag = &user.name;
+
+                println!("Updating Profile Picture for {user_id} ({tag})...");
 
                 let avatar_url = user.face();
 
@@ -47,7 +49,7 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
 
                 match already_existing_record {
                     Some(_) => {
-                        continue;
+                        // Do nothing, still same pfp
                     }
                     None => {
                         let now = SystemTime::now();
@@ -66,6 +68,52 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
                             image_url).execute(database).await.unwrap();
                     }
                 }
+
+                println!("Updating Usernames for {user_id} ({tag})...");
+
+                let username = &user.global_name;
+
+                match username {
+                    Some(username) => {
+
+                        let already_existing_record = sqlx::query!(
+                            "SELECT username FROM UsernameChange WHERE username = ? AND userId = ?",
+                            username,
+                            entry.discordId
+                        )
+                        .fetch_optional(database)
+                        .await
+                        .unwrap();
+
+                        match already_existing_record {
+                            Some(_) => {
+                                // Still same username
+                                continue;
+                            }
+                            None => {
+                                let now = SystemTime::now();
+                                let dt: DateTime<Utc> = now.clone().into();
+                                let timestamp = dt.timestamp();
+
+                                sqlx::query!(
+                                    "INSERT INTO UsernameChange (changedAt, username, userId) VALUES (?, ?, ?)",
+                                    timestamp,
+                                    username,
+                                    entry.discordId
+                                )
+                                .execute(database)
+                                .await
+                                .unwrap();
+
+                                println!("Updated username for {} to {}", entry.discordId, username);
+                            }
+                        }
+                    }
+                    None => {
+                        continue;
+                    }
+                }
+
             }
         }
         Err(_) => {
