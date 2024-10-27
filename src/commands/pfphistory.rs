@@ -7,7 +7,7 @@ use sqlx::SqlitePool;
 
 use crate::util::objects::EmbedEntry;
 
-const ENTRIES_PER_PAGE: usize = 2;
+const ENTRIES_PER_PAGE: usize = 10;
 
 pub async fn run(
     ctx: &Context,
