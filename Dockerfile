@@ -1,37 +1,45 @@
-FROM rust:1.78-buster as build
+# Build stage
+FROM rust:1.75-slim-bullseye AS builder
 
-# create a new empty shell project
-RUN USER=root cargo new --bin pfp-checker
-WORKDIR /pfp-checker
+# Install required dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    sqlite3 \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# copy over your manifests
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
+# Create a new empty shell project
+WORKDIR /usr/src/app
+COPY . .
 
-# this build step will cache your dependencies
-RUN cargo build --release
-RUN rm src/*.rs
-
-# copy your source tree
-COPY ./src ./src
-
-# copy SQL info
-COPY ./migrations ./migrations
-COPY ./.sqlx ./.sqlx
-COPY ./database.sqlite ./database.sqlite
-
-# Install Database CLI and apply migrations
-RUN cargo install sqlx-cli
-RUN sqlx database setup --database-url sqlite:database.sqlite
-
-# build for release
-RUN rm ./target/release/deps/pfp_checker*
+# Build the project with release optimizations
 RUN cargo build --release
 
-FROM rust:1.78-slim-buster
+# Runtime stage
+FROM debian:bullseye-slim
 
-# copy the build artifact from the build stage
-COPY --from=build /pfp-checker/target/release/pfp-checker .
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    sqlite3 \
+    libsqlite3-0 \
+    && rm -rf /var/lib/apt/lists/*
 
-# set the startup command to run your binary
+WORKDIR /app
+
+# Copy the built binary from builder
+COPY --from=builder /usr/src/app/target/release/pfp-checker /app/pfp-checker
+# Copy migrations folder
+COPY --from=builder /usr/src/app/migrations /app/migrations
+
+# Create volume for persistent database storage
+VOLUME ["/app/data"]
+
+# Set environment variables
+ENV DATABASE_URL=sqlite:/app/data/database.sqlite
+
+# Run the binary
 CMD ["./pfp-checker"]
