@@ -1,42 +1,45 @@
-# Stage 1: Build the Rust project
-FROM rust:latest AS builder
+# Build stage
+FROM rust:1.75-slim-bullseye as builder
 
-# Install dependencies required for sqlx
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    libssl-dev \
+# Install required dependencies
+RUN apt-get update && \
+    apt-get install -y \
     pkg-config \
-    openssl
-
-# Create a new empty shell project
-RUN USER=root cargo new --bin pfp-checker
-WORKDIR /pfp-checker
-
-# Copy the Cargo.toml and Cargo.lock files
-COPY Cargo.toml Cargo.lock ./
-
-# Build dependencies (this is done to cache dependencies separately from the app code)
-RUN cargo build --release
-
-# Copy the rest of the source code
-COPY . .
-
-# If you are using sqlx offline mode (recommended for production), run:
-RUN cargo sqlx prepare -- --lib
-RUN cargo build --release
-
-# Stage 2: Create a smaller image with only the compiled binary
-FROM debian:buster-slim
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    libssl1.1 \
-    && apt-get clean \
+    libssl-dev \
+    sqlite3 \
+    libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the compiled binary from the builder stage
-COPY --from=builder /pfp-checker/target/release/pfp-checker /usr/local/bin/pfp-checker
+# Create a new empty shell project
+WORKDIR /usr/src/app
+COPY . .
 
-# Set the binary as the entry point
-ENTRYPOINT ["pfp-checker"]
+# Build the project with release optimizations
+RUN cargo build --release
+
+# Runtime stage
+FROM debian:bullseye-slim
+
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    ca-certificates \
+    sqlite3 \
+    libsqlite3-0 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy the built binary from builder
+COPY --from=builder /usr/src/app/target/release/pfp-checker /app/pfp-checker
+# Copy migrations folder
+COPY --from=builder /usr/src/app/migrations /app/migrations
+
+# Create volume for persistent database storage
+VOLUME ["/app/data"]
+
+# Set environment variables
+ENV DATABASE_URL=sqlite:/app/data/database.sqlite
+
+# Run the binary
+CMD ["./pfp-checker"]

@@ -191,6 +191,7 @@ async fn main() {
 
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let databaseurl = env::var("DATABASE_URL").expect("Expected a database url in the environment");
 
     // Initiate a connection to the database file, creating the file if required.
     let database = Arc::new(
@@ -198,7 +199,7 @@ async fn main() {
             .max_connections(5)
             .connect_with(
                 sqlx::sqlite::SqliteConnectOptions::new()
-                    .filename("database.sqlite")
+                    .filename(databaseurl)
                     .create_if_missing(true),
             )
             .await
