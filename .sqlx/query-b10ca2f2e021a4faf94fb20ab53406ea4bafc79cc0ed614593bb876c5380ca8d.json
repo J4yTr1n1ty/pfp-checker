@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT link FROM ProfilePicture WHERE userId = ? ORDER BY changedAt DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "link",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "b10ca2f2e021a4faf94fb20ab53406ea4bafc79cc0ed614593bb876c5380ca8d"
+}

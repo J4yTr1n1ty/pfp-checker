@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT CASE WHEN (SELECT checksum FROM ProfilePicture WHERE userId = ? ORDER BY changedAt DESC LIMIT 1) = ? THEN 1 ELSE 0 END AS equals",
+  "describe": {
+    "columns": [
+      {
+        "name": "equals",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cd842664300ef9cdeeeb7de59fd6a0e115d9cfcd1adbf9c2157b28c660f588f8"
+}
