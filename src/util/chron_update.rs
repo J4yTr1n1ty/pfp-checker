@@ -49,7 +49,36 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
 
                 match already_existing_record {
                     Some(_) => {
-                        // Do nothing, still same pfp
+                        // Check if same image as last change
+                        let last_change_equals_now = sqlx::query!(
+                            "SELECT CASE WHEN (SELECT checksum FROM ProfilePicture WHERE userId = ? ORDER BY changedAt DESC LIMIT 1) = ? THEN 1 ELSE 0 END AS equals",
+                            entry.discordId,
+                            checksum
+                        )
+                        .fetch_one(database)
+                        .await
+                        .expect("Failed to check if last change equals now");
+
+                        if last_change_equals_now.equals == 1 {
+                            continue;
+                        } else {
+                            println!("Updating pfp for {} with checksum {} (used previously)", entry.discordId, checksum);
+
+                            // FIXME: Don't upload every time
+                            let image_url = upload_image_to_img_bb(bytes.to_vec(), entry.discordId).await.unwrap();
+
+                            let now = SystemTime::now();
+                            let dt: DateTime<Utc> = now.clone().into();
+                            let timestamp = dt.timestamp();
+
+                            sqlx::query!(
+                                "INSERT INTO ProfilePicture (checksum, userId, changedAt, link) VALUES (?, ?, ?, ?)", 
+                                checksum, 
+                                entry.discordId, 
+                                timestamp, 
+                                image_url).execute(database).await.unwrap();
+
+                        }
                     }
                     None => {
                         let now = SystemTime::now();
