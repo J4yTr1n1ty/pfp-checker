@@ -64,8 +64,15 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
                         } else {
                             println!("Updating pfp for {} with checksum {} (used previously)", entry.discordId, checksum);
 
-                            // FIXME: Don't upload every time
-                            let image_url = upload_image_to_img_bb(bytes.to_vec(), entry.discordId).await.unwrap();
+                            let existing_image = sqlx::query!(
+                                "SELECT link FROM ProfilePicture WHERE userId = ? ORDER BY changedAt DESC LIMIT 1",
+                                entry.discordId
+                            )
+                            .fetch_one(database)
+                            .await
+                            .unwrap();
+
+                            let image_url = existing_image.link;
 
                             let now = SystemTime::now();
                             let dt: DateTime<Utc> = now.clone().into();
