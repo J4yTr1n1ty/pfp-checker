@@ -1,6 +1,6 @@
 [package]
 name = "pfp-checker"
-version = "0.3.7"
+version = "0.3.8"
 authors=["Jay <jay@projectchaos.ch>"]
 edition = "2021"
 
