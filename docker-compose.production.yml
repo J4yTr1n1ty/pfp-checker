@@ -1,6 +1,6 @@
 services:
   discord-bot:
-    image: ghcr.io/j4ytr1n1ty/pfp-spy:latest
+    image: ghcr.io/j4ytr1n1ty/pfp-checker:latest
     env_file:
       - .env
     volumes:
