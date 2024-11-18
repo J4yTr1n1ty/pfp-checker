@@ -1,0 +1,19 @@
+services:
+  discord-bot:
+    image: ghcr.io/j4ytr1n1ty/pfp-spy:latest
+    env_file:
+      - .env
+    volumes:
+      - "./data:/app/data"
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=/app/data/database.sqlite
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --label-enable
+    restart: unless-stopped
