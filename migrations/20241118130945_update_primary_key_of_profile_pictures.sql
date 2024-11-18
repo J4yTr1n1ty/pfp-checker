@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 -- Step 1: Create a new table with the desired primary key
 CREATE TABLE ProfilePicture_new (
   checksum TEXT,
@@ -18,3 +20,18 @@ DROP TABLE ProfilePicture;
 
 -- Step 4: Rename the new table to the original table name
 ALTER TABLE ProfilePicture_new RENAME TO ProfilePicture;
+
+-- Step 5: Verify data migration
+DO $$
+DECLARE
+  old_count INTEGER;
+  new_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO old_count FROM ProfilePicture;
+  SELECT COUNT(*) INTO new_count FROM ProfilePicture_new;
+  IF old_count != new_count THEN
+    RAISE EXCEPTION 'Data migration verification failed: count mismatch';
+  END IF;
+END $$;
+
+COMMIT;
