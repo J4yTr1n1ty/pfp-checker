@@ -20,7 +20,6 @@ DROP TABLE ProfilePicture;
 ALTER TABLE ProfilePicture_new RENAME TO ProfilePicture;
 
 -- Step 5: Verify data migration
-DO $$
 DECLARE
   old_count INTEGER;
   new_count INTEGER;
@@ -30,4 +29,3 @@ BEGIN
   IF old_count != new_count THEN
     RAISE EXCEPTION 'Data migration verification failed: count mismatch';
   END IF;
-END $$;
