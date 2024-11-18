@@ -1,5 +1,3 @@
-BEGIN TRANSACTION;
-
 -- Step 1: Create a new table with the desired primary key
 CREATE TABLE ProfilePicture_new (
   checksum TEXT,
@@ -33,5 +31,3 @@ BEGIN
     RAISE EXCEPTION 'Data migration verification failed: count mismatch';
   END IF;
 END $$;
-
-COMMIT;
