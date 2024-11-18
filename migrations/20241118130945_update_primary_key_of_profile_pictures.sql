@@ -18,14 +18,3 @@ DROP TABLE ProfilePicture;
 
 -- Step 4: Rename the new table to the original table name
 ALTER TABLE ProfilePicture_new RENAME TO ProfilePicture;
-
--- Step 5: Verify data migration
-DECLARE
-  old_count INTEGER;
-  new_count INTEGER;
-BEGIN
-  SELECT COUNT(*) INTO old_count FROM ProfilePicture;
-  SELECT COUNT(*) INTO new_count FROM ProfilePicture_new;
-  IF old_count != new_count THEN
-    RAISE EXCEPTION 'Data migration verification failed: count mismatch';
-  END IF;
