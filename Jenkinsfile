@@ -1,10 +1,20 @@
 pipeline {
   agent any
   stages {
+    stage('Install Rust') {
+      steps {
+        sh '''
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+        '''
+      }
+    }
     stage('Verify cargo installation') {
       steps {
-        sh '. "$HOME/.cargo/env"'
-        sh 'cargo --version'
+        sh '''
+          source $HOME/.cargo/env
+          cargo --version
+        '''
       }
     }
     stage('Install Database CLI') {
