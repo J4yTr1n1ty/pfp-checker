@@ -1,8 +1,5 @@
 pipeline {
   agent any
-  options {
-    cache(path: 'target', key: 'rust-cache')
-  }
   stages {
     stage('Verify cargo installation') {
       steps {
@@ -12,7 +9,11 @@ pipeline {
     }
     stage('Install Database CLI') {
       steps {
-        sh 'cargo install sqlx-cli'
+        cache(maxCacheSize: 1, caches: [
+          [path: 'target', key: 'rust-cache']
+        ]) {
+          sh 'cargo install sqlx-cli'
+        }
       }
     }
     stage('Database Migration') {
@@ -22,12 +23,20 @@ pipeline {
     }
     stage('Build') {
       steps {
-        sh 'cargo build --verbose'
+        cache(maxCacheSize: 1, caches: [
+          [path: 'target', key: 'rust-cache']
+        ]) {
+          sh 'cargo build --verbose'
+        }
       }
     }
     stage('Test') {
       steps {
-        sh 'cargo test --verbose'
+        cache(maxCacheSize: 1, caches: [
+          [path: 'target', key: 'rust-cache']
+        ]) {
+          sh 'cargo test --verbose'
+        }
       }
     }
   }
