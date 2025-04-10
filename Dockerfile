@@ -1,14 +1,14 @@
 # Build stage
-FROM rust:1.75-slim-bullseye AS builder
+FROM rust:1.86-slim-bullseye AS builder
 
 # Install required dependencies
 RUN apt-get update && \
-    apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    sqlite3 \
-    libsqlite3-dev \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get install -y \
+  pkg-config \
+  libssl-dev \
+  sqlite3 \
+  libsqlite3-dev \
+  && rm -rf /var/lib/apt/lists/*
 
 # Create a new empty shell project
 WORKDIR /usr/src/app
@@ -22,11 +22,11 @@ FROM debian:bullseye-slim
 
 # Install runtime dependencies
 RUN apt-get update && \
-    apt-get install -y \
-    ca-certificates \
-    sqlite3 \
-    libsqlite3-0 \
-    && rm -rf /var/lib/apt/lists/*
+  apt-get install -y \
+  ca-certificates \
+  sqlite3 \
+  libsqlite3-0 \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
