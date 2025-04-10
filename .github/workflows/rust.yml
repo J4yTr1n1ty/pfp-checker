@@ -2,8 +2,6 @@ name: Rust
 
 on:
   push:
-    tags:
-      - '*'
   pull_request:
 
 env:
@@ -11,16 +9,15 @@ env:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Install Database CLI
-      run: cargo install sqlx-cli
-    - name: Database Migration
-      run: sqlx database setup --database-url sqlite:database.sqlite
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+      - name: Build
+        run: cargo build --verbose
+      - name: Install Database CLI
+        run: cargo install sqlx-cli
+      - name: Database Migration
+        run: sqlx database setup --database-url sqlite:database.sqlite
+      - name: Run tests
+        run: cargo test --verbose
