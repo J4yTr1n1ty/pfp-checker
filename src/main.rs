@@ -1,11 +1,11 @@
 mod commands;
+mod db;
 mod util;
 
-use dotenv::dotenv;
 use serenity::all::UserId;
-use std::env;
 use std::sync::Arc;
 use tokio::task;
+use util::config::Config;
 use util::objects;
 
 use serenity::async_trait;
@@ -259,35 +259,16 @@ async fn fetch_profile_pictures(
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok(); // load all environment variables from the .env file
+    let config = Config::from_env().expect("Failed to load configuration.");
 
-    // Configure the client with your Discord bot token in the environment.
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
-    let databaseurl = env::var("DATABASE_URL").expect("Expected a database url in the environment");
-
-    // Initiate a connection to the database file, creating the file if required.
-    let database = Arc::new(
-        sqlx::sqlite::SqlitePoolOptions::new()
-            .max_connections(5)
-            .connect_with(
-                sqlx::sqlite::SqliteConnectOptions::new()
-                    .filename(databaseurl)
-                    .create_if_missing(true),
-            )
-            .await
-            .expect("Couldn't connect to database"),
-    );
-
-    // Run migrations, which updates the database's schema to the latest version.
-    sqlx::migrate!("./migrations")
-        .run(&*database)
+    let database = db::connection::establish_connection(&config.database_url)
         .await
-        .expect("Couldn't run database migrations");
+        .expect("Failed to establish database connection.");
 
     let handler = Handler { database };
 
     // Build our client.
-    let mut client = Client::builder(token, GatewayIntents::empty())
+    let mut client = Client::builder(config.discord_token, GatewayIntents::empty())
         .event_handler(handler)
         .await
         .expect("Error creating client");

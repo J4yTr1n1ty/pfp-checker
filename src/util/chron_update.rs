@@ -4,9 +4,11 @@ use chrono::{DateTime, Utc};
 use serenity::all::{Http, UserId};
 use sha1::{Digest, Sha1};
 
-use crate::util::uploader::upload_image_to_img_bb;
+use crate::util::{config::Config, external::imgbb};
 
 pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) {
+    let config = Config::from_env().expect("Unable to load configuration.");
+
     let users_to_check = sqlx::query!("SELECT discordId FROM User")
         .fetch_all(database)
         .await;
@@ -102,9 +104,12 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
                         checksum
                     );
 
-                    let image_url = upload_image_to_img_bb(bytes.to_vec(), entry.discordId)
-                        .await
-                        .unwrap();
+                    let filename = format!("pfp_{}_{}.png", user_id, timestamp);
+
+                    let image_url =
+                        imgbb::upload_image(bytes.to_vec(), filename, &config.imgbb_key)
+                            .await
+                            .unwrap();
 
                     sqlx::query!(
                         "INSERT INTO ProfilePicture (checksum, userId, changedAt, link) VALUES (?, ?, ?, ?)", 
