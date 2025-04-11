@@ -4,9 +4,21 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "**/*.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "Dockerfile"
+      - ".github/workflows/docker-image.yml"
   pull_request:
     branches:
       - main
+    paths:
+      - "**/*.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "Dockerfile"
+      - ".github/workflows/docker-image.yml"
 
 jobs:
   build:
