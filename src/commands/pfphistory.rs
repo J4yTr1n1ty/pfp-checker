@@ -40,7 +40,7 @@ pub async fn run(
                         let pfps: Vec<EmbedEntry> = entries
                             .into_iter()
                             .map(|entry| {
-                                let tracking_start_date = entry.changedAt.unwrap() as i64;
+                                let tracking_start_date = entry.changedAt.unwrap();
                                 let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
                                 EmbedEntry {
                                     title: format!(
@@ -145,7 +145,7 @@ pub async fn get_paginated_embed_edit_response(
             .disabled(end == pfps.len()),
     ]);
 
-    return Ok(EditMessage::new().embed(embed).components(vec![components]));
+    Ok(EditMessage::new().embed(embed).components(vec![components]))
 }
 
 pub async fn get_paginated_embed_response(
@@ -181,11 +181,11 @@ pub async fn get_paginated_embed_response(
             .disabled(end == pfps.len()),
     ]);
 
-    return Ok(CreateInteractionResponse::Message(
+    Ok(CreateInteractionResponse::Message(
         CreateInteractionResponseMessage::new()
             .embed(embed)
             .components(vec![components]),
-    ));
+    ))
 }
 
 pub async fn send_paginated_response(

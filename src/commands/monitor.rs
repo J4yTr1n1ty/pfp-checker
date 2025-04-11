@@ -27,30 +27,27 @@ pub async fn run(
         .fetch_one(database)
         .await;
 
-        match entry {
-            Ok(record) => {
-                let tracking_start_date = record.trackedSince.unwrap() as i64;
-                let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
-                interaction
-                    .create_response(
-                        &ctx.http,
-                        CreateInteractionResponse::Message(
-                            CreateInteractionResponseMessage::new().content(format!(
-                                "{} is already being tracked since <t:{}:F>",
-                                user.name,
-                                dt.timestamp()
-                            )),
-                        ),
-                    )
-                    .await
-                    .unwrap();
-                return Ok(());
-            }
-            Err(_) => (),
+        if let Ok(record) = entry {
+            let tracking_start_date = record.trackedSince.unwrap();
+            let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
+            interaction
+                .create_response(
+                    &ctx.http,
+                    CreateInteractionResponse::Message(
+                        CreateInteractionResponseMessage::new().content(format!(
+                            "{} is already being tracked since <t:{}:F>",
+                            user.name,
+                            dt.timestamp()
+                        )),
+                    ),
+                )
+                .await
+                .unwrap();
+            return Ok(());
         }
 
         let now = SystemTime::now();
-        let dt: DateTime<Utc> = now.clone().into();
+        let dt: DateTime<Utc> = now.into();
         let timestamp = dt.timestamp();
 
         // Add the user to the database

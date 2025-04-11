@@ -220,11 +220,11 @@ async fn fetch_usernames(
     Ok(entries
         .into_iter()
         .map(|entry| {
-            let tracking_start_date = entry.changedAt.unwrap() as i64;
+            let tracking_start_date = entry.changedAt.unwrap();
             let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0).unwrap();
             objects::EmbedEntry {
                 title: format!("Username first recorded <t:{}:R>", dt.timestamp()),
-                content: format!("{}", entry.username.unwrap()),
+                content: entry.username.unwrap().to_string(),
                 inline: false,
             }
         })
@@ -242,7 +242,7 @@ async fn fetch_profile_pictures(
     Ok(entries
         .into_iter()
         .map(|entry| {
-            let tracking_start_date = entry.changedAt.unwrap() as i64;
+            let tracking_start_date = entry.changedAt.unwrap();
             let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0).unwrap();
             objects::EmbedEntry {
                 title: format!("Profile Picture first recorded <t:{}:R>", dt.timestamp()),

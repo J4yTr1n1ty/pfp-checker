@@ -75,7 +75,7 @@ pub async fn run(
             .unwrap();
     }
 
-    return Ok(());
+    Ok(())
 }
 
 pub fn register() -> CreateCommand {
