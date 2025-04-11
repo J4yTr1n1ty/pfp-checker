@@ -2,22 +2,133 @@ name: Rust
 
 on:
   push:
+    branches: ["main"]
+    paths:
+      - "**/*.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/rust-quality.yml"
   pull_request:
+    branches: ["main"]
+    paths:
+      - "**/*.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/rust-quality.yml"
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
 
 jobs:
-  build:
+  format:
+    name: Check Formatting
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: cargo build --verbose
-      - name: Install Database CLI
+        with:
+          # Full git history for auto-commit
+          fetch-depth: 0
+          # Use token with write permissions for push
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Check formatting
+        id: format-check
+        run: cargo fmt --all -- --check
+        continue-on-error: true
+
+      - name: Fix formatting issues
+        if: steps.format-check.outcome == 'failure'
+        run: |
+          cargo fmt --all
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          # Create a new branch from the current HEAD
+          BRANCH_NAME="fix/formatting-$(date +'%Y%m%d%H%M%S')"
+          git checkout -b $BRANCH_NAME
+
+          git add .
+          git commit -m "Fix code formatting issues"
+          git push origin $BRANCH_NAME
+
+          # Create PR using GitHub CLI
+          gh pr create \
+            --title "Fix code formatting issues" \
+            --body "This PR fixes code formatting issues identified by cargo fmt." \
+            --base main \
+            --head $BRANCH_NAME
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  lint:
+    name: Lint with Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install SQLx CLI
         run: cargo install sqlx-cli
+
       - name: Database Migration
         run: sqlx database setup --database-url sqlite:database.sqlite
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+  audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit
+
+      - name: Run security audit
+        run: cargo audit
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install SQLx CLI
+        run: cargo install sqlx-cli
+
+      - name: Database Migration
+        run: sqlx database setup --database-url sqlite:database.sqlite
+
+      - name: Build
+        run: cargo build --verbose
+
       - name: Run tests
         run: cargo test --verbose
