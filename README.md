@@ -10,16 +10,16 @@
 
 </div>
 
-> **Do you have friends on Discord who change their profile pictures way too often? Ever wondered how many times they change their profile pictures? This bot will be your _blazingly fast_ solution.** 🚀
+> **Do you have friends on Discord who change their profile pictures way too often? Ever wondered how many times they change their profile pictures or server icons? This bot will be your _blazingly fast_ solution.** 🚀
 
-PFP Checker is a Discord bot that tracks and archives users' profile pictures and username history, providing statistics and detailed historical records of changes.
+PFP Checker is a Discord bot that tracks and archives users' profile pictures, username history, and server icons, providing statistics and detailed historical records of changes.
 
 ## ✨ Features
 
-- 📊 **Comprehensive Tracking**: Monitor profile pictures and usernames
+- 📊 **Comprehensive Tracking**: Monitor profile pictures, usernames, and server icons
 - 📅 **Historical Records**: View the complete history of changes
 - 📈 **Advanced Statistics**: Track frequency of changes with averages
-- 🔍 **User Insights**: Understand patterns in profile updates
+- 🔍 **User & Server Insights**: Understand patterns in profile and server updates
 - 🔄 **Automatic Updates**: Regular checking for changes
 - 🐳 **Docker Support**: Easy deployment with Docker and Docker Compose
 
@@ -64,6 +64,8 @@ cargo build --release
 
 ## 📋 Available Commands
 
+### User Tracking
+
 | Command                  | Description                                            |
 | ------------------------ | ------------------------------------------------------ |
 | `/monitor @user`         | Start tracking a user's profile picture and username   |
@@ -71,7 +73,21 @@ cargo build --release
 | `/pfphistory @user`      | View a user's profile picture history                  |
 | `/usernamehistory @user` | View a user's username history                         |
 | `/stats @user`           | Show statistics about a user's profile picture changes |
-| `/ping`                  | Check if the bot is online                             |
+
+### Server Tracking
+
+| Command                  | Description                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `/monitorserver`         | Start tracking this server's icon changes              |
+| `/removemonitorserver`   | Stop tracking this server's icon changes               |
+| `/serverpfphistory`      | View this server's icon history                        |
+| `/serverstats`           | Show statistics about this server's icon changes       |
+
+### General
+
+| Command | Description                |
+| ------- | -------------------------- |
+| `/ping` | Check if the bot is online |
 
 ## 🧰 Development Setup
 
