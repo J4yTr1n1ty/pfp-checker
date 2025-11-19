@@ -86,7 +86,8 @@ impl EventHandler for Handler {
                         commands::monitorserver::run(&ctx, &command, &self.database)
                             .await
                             .unwrap();
-                        util::chron_update::update_monitored_servers(&ctx.http, &self.database).await;
+                        util::chron_update::update_monitored_servers(&ctx.http, &self.database)
+                            .await;
                         None
                     }
                     "removemonitorserver" => {

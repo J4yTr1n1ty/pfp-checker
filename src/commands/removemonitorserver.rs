@@ -45,8 +45,10 @@ pub async fn run(
                     .create_response(
                         &ctx.http,
                         CreateInteractionResponse::Message(
-                            CreateInteractionResponseMessage::new()
-                                .content(format!("Successfully removed {} from monitoring.", guild_name)),
+                            CreateInteractionResponseMessage::new().content(format!(
+                                "Successfully removed {} from monitoring.",
+                                guild_name
+                            )),
                         ),
                     )
                     .await?;

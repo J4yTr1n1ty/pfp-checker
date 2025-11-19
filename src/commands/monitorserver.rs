@@ -87,12 +87,12 @@ pub async fn run(
     interaction
         .create_response(
             &ctx.http,
-            CreateInteractionResponse::Message(
-                CreateInteractionResponseMessage::new().content(format!(
+            CreateInteractionResponse::Message(CreateInteractionResponseMessage::new().content(
+                format!(
                     "Successfully added {} to the server monitoring list.",
                     guild_name
-                )),
-            ),
+                ),
+            )),
         )
         .await?;
 

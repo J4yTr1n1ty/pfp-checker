@@ -57,8 +57,10 @@ pub async fn run(
                     .create_response(
                         &ctx.http,
                         CreateInteractionResponse::Message(
-                            CreateInteractionResponseMessage::new()
-                                .content(format!("{} has no recorded server icon history.", guild_name)),
+                            CreateInteractionResponseMessage::new().content(format!(
+                                "{} has no recorded server icon history.",
+                                guild_name
+                            )),
                         ),
                     )
                     .await?;
@@ -80,15 +82,8 @@ pub async fn run(
                 });
             }
 
-            send_paginated_response(
-                ctx,
-                interaction,
-                &guild_name,
-                guild_id,
-                &embed_entries,
-                0,
-            )
-            .await?;
+            send_paginated_response(ctx, interaction, &guild_name, guild_id, &embed_entries, 0)
+                .await?;
         }
         Err(_) => {
             interaction

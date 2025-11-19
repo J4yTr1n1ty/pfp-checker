@@ -1,8 +1,8 @@
 // ABOUTME: Integration tests for server tracking database functionality
 // ABOUTME: Tests migrations, CRUD operations, and data integrity for Server and ServerPicture tables
+use chrono::{DateTime, Utc};
 use sqlx::{migrate::MigrateDatabase, Sqlite, SqlitePool};
 use std::time::SystemTime;
-use chrono::{DateTime, Utc};
 use tempfile::TempDir;
 
 /// Helper function to create a test database
@@ -18,10 +18,7 @@ async fn create_test_db() -> (SqlitePool, TempDir) {
     let pool = SqlitePool::connect(&db_url).await.unwrap();
 
     // Run migrations
-    sqlx::migrate!("./migrations")
-        .run(&pool)
-        .await
-        .unwrap();
+    sqlx::migrate!("./migrations").run(&pool).await.unwrap();
 
     (pool, temp_dir)
 }
@@ -31,9 +28,10 @@ async fn test_server_table_creation() {
     let (pool, _temp_dir) = create_test_db().await;
 
     // Verify Server table exists
-    let result = sqlx::query!("SELECT name FROM sqlite_master WHERE type='table' AND name='Server'")
-        .fetch_one(&pool)
-        .await;
+    let result =
+        sqlx::query!("SELECT name FROM sqlite_master WHERE type='table' AND name='Server'")
+            .fetch_one(&pool)
+            .await;
 
     assert!(result.is_ok(), "Server table should exist");
     pool.close().await;
@@ -44,9 +42,10 @@ async fn test_server_picture_table_creation() {
     let (pool, _temp_dir) = create_test_db().await;
 
     // Verify ServerPicture table exists
-    let result = sqlx::query!("SELECT name FROM sqlite_master WHERE type='table' AND name='ServerPicture'")
-        .fetch_one(&pool)
-        .await;
+    let result =
+        sqlx::query!("SELECT name FROM sqlite_master WHERE type='table' AND name='ServerPicture'")
+            .fetch_one(&pool)
+            .await;
 
     assert!(result.is_ok(), "ServerPicture table should exist");
     pool.close().await;
@@ -71,7 +70,11 @@ async fn test_insert_server() {
     .await;
 
     assert!(result.is_ok(), "Should be able to insert a server");
-    assert_eq!(result.unwrap().rows_affected(), 1, "Should insert exactly one row");
+    assert_eq!(
+        result.unwrap().rows_affected(),
+        1,
+        "Should insert exactly one row"
+    );
 
     pool.close().await;
 }
@@ -106,7 +109,11 @@ async fn test_retrieve_server() {
     assert!(result.is_ok(), "Should be able to retrieve the server");
     let record = result.unwrap();
     assert_eq!(record.serverId, server_id, "Server ID should match");
-    assert_eq!(record.trackedSince, Some(timestamp), "Timestamp should match");
+    assert_eq!(
+        record.trackedSince,
+        Some(timestamp),
+        "Timestamp should match"
+    );
 
     pool.close().await;
 }
@@ -136,15 +143,16 @@ async fn test_delete_server() {
         .await;
 
     assert!(delete_result.is_ok(), "Should be able to delete the server");
-    assert_eq!(delete_result.unwrap().rows_affected(), 1, "Should delete exactly one row");
+    assert_eq!(
+        delete_result.unwrap().rows_affected(),
+        1,
+        "Should delete exactly one row"
+    );
 
     // Verify deletion
-    let fetch_result = sqlx::query!(
-        "SELECT serverId FROM Server WHERE serverId = ?",
-        server_id
-    )
-    .fetch_optional(&pool)
-    .await;
+    let fetch_result = sqlx::query!("SELECT serverId FROM Server WHERE serverId = ?", server_id)
+        .fetch_optional(&pool)
+        .await;
 
     assert!(fetch_result.is_ok());
     assert!(fetch_result.unwrap().is_none(), "Server should be deleted");
@@ -186,7 +194,11 @@ async fn test_insert_server_picture() {
     .await;
 
     assert!(result.is_ok(), "Should be able to insert a server picture");
-    assert_eq!(result.unwrap().rows_affected(), 1, "Should insert exactly one row");
+    assert_eq!(
+        result.unwrap().rows_affected(),
+        1,
+        "Should insert exactly one row"
+    );
 
     pool.close().await;
 }
@@ -213,8 +225,16 @@ async fn test_retrieve_server_pictures() {
     // Insert multiple server pictures
     let pictures = vec![
         ("checksum1", "https://example.com/icon1.png", timestamp),
-        ("checksum2", "https://example.com/icon2.png", timestamp + 100),
-        ("checksum3", "https://example.com/icon3.png", timestamp + 200),
+        (
+            "checksum2",
+            "https://example.com/icon2.png",
+            timestamp + 100,
+        ),
+        (
+            "checksum3",
+            "https://example.com/icon3.png",
+            timestamp + 200,
+        ),
     ];
 
     for (checksum, link, time) in &pictures {
@@ -238,7 +258,10 @@ async fn test_retrieve_server_pictures() {
     .fetch_all(&pool)
     .await;
 
-    assert!(results.is_ok(), "Should be able to retrieve server pictures");
+    assert!(
+        results.is_ok(),
+        "Should be able to retrieve server pictures"
+    );
     let records = results.unwrap();
     assert_eq!(records.len(), 3, "Should retrieve all three pictures");
 
@@ -296,7 +319,11 @@ async fn test_cascade_delete_server_pictures() {
     .await;
 
     assert!(pictures.is_ok());
-    assert_eq!(pictures.unwrap().len(), 0, "Server pictures should be cascade deleted");
+    assert_eq!(
+        pictures.unwrap().len(),
+        0,
+        "Server pictures should be cascade deleted"
+    );
 
     pool.close().await;
 }
@@ -330,7 +357,10 @@ async fn test_unique_server_id_constraint() {
     .execute(&pool)
     .await;
 
-    assert!(duplicate_result.is_err(), "Should not allow duplicate server IDs");
+    assert!(
+        duplicate_result.is_err(),
+        "Should not allow duplicate server IDs"
+    );
 
     pool.close().await;
 }
@@ -380,7 +410,10 @@ async fn test_server_picture_composite_key() {
     .execute(&pool)
     .await;
 
-    assert!(duplicate_result.is_err(), "Should not allow duplicate composite keys");
+    assert!(
+        duplicate_result.is_err(),
+        "Should not allow duplicate composite keys"
+    );
 
     // But same checksum with different timestamp should work
     let different_timestamp = timestamp + 100;
@@ -394,7 +427,10 @@ async fn test_server_picture_composite_key() {
     .execute(&pool)
     .await;
 
-    assert!(different_time_result.is_ok(), "Should allow same checksum with different timestamp");
+    assert!(
+        different_time_result.is_ok(),
+        "Should allow same checksum with different timestamp"
+    );
 
     pool.close().await;
 }
@@ -452,8 +488,16 @@ async fn test_query_latest_server_picture() {
 
     assert!(latest.is_ok(), "Should retrieve the latest picture");
     let record = latest.unwrap();
-    assert_eq!(record.checksum.unwrap(), "latest_checksum", "Should get the latest checksum");
-    assert_eq!(record.link.unwrap(), "https://example.com/latest.png", "Should get the latest link");
+    assert_eq!(
+        record.checksum.unwrap(),
+        "latest_checksum",
+        "Should get the latest checksum"
+    );
+    assert_eq!(
+        record.link.unwrap(),
+        "https://example.com/latest.png",
+        "Should get the latest link"
+    );
 
     pool.close().await;
 }
