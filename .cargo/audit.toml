@@ -3,5 +3,4 @@ ignore = [
     "RUSTSEC-2023-0071",  # RSA Marvin Attack - affects sqlx-mysql which we don't use
 ]
 
-[advisories.informational]
-unmaintained = "warn"  # Warn about unmaintained crates but don't fail
+informational_warnings = ["unmaintained"]  # Warn about unmaintained crates but don't fail
