@@ -1,7 +1,9 @@
+// ABOUTME: Scheduled update functions for monitoring user profile pictures and server icons
+// ABOUTME: Checks for changes, calculates checksums, uploads new images to imgbb, and stores history
 use std::time::SystemTime;
 
 use chrono::{DateTime, Utc};
-use serenity::all::{Http, UserId};
+use serenity::all::{GuildId, Http, UserId};
 use sha1::{Digest, Sha1};
 
 use crate::util::{config::Config, external::imgbb};
@@ -161,6 +163,139 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
                 }
                 None => {
                     continue;
+                }
+            }
+        }
+    }
+}
+
+pub async fn update_monitored_servers(client: &Http, database: &sqlx::SqlitePool) {
+    let config = Config::from_env().expect("Unable to load configuration.");
+
+    let servers_to_check = sqlx::query!("SELECT serverId FROM Server")
+        .fetch_all(database)
+        .await;
+
+    if let Ok(entries) = servers_to_check {
+        println!("Updating {} servers...", entries.len());
+
+        for entry in entries {
+            let guild_id = GuildId::new(entry.serverId.try_into().unwrap());
+
+            let guild = match guild_id.to_partial_guild(client).await {
+                Ok(g) => g,
+                Err(_) => {
+                    println!("Unable to retrieve Server {}", entry.serverId);
+                    continue;
+                }
+            };
+
+            let guild_name = &guild.name;
+
+            println!("Updating Server Icon for {guild_id} ({guild_name})...");
+
+            // Get the server icon URL
+            let icon_url = match guild.icon_url() {
+                Some(url) => url,
+                None => {
+                    println!("Server {guild_id} has no icon, skipping...");
+                    continue;
+                }
+            };
+
+            let response = reqwest::get(&icon_url).await.unwrap();
+            let bytes = response.bytes().await.unwrap();
+
+            let mut hasher = Sha1::new();
+            hasher.update(&bytes);
+
+            let result = hasher.finalize();
+            let checksum = format!("{:x}", result); // Format as hex
+
+            let already_existing_record = sqlx::query!(
+                "SELECT checksum FROM ServerPicture WHERE checksum = ? AND serverId = ?",
+                checksum,
+                entry.serverId
+            )
+            .fetch_optional(database)
+            .await
+            .unwrap();
+
+            match already_existing_record {
+                Some(_) => {
+                    // Check if same image as last change
+                    let last_change_equals_now = sqlx::query!(
+                        "SELECT CASE WHEN (SELECT checksum FROM ServerPicture WHERE serverId = ? ORDER BY changedAt DESC LIMIT 1) = ? THEN 1 ELSE 0 END AS equals",
+                        entry.serverId,
+                        checksum
+                    )
+                    .fetch_one(database)
+                    .await
+                    .expect("Failed to check if last change equals now");
+
+                    if last_change_equals_now.equals == 1 {
+                        continue;
+                    } else {
+                        println!(
+                            "Updating server icon for {} with checksum {} (used previously)",
+                            entry.serverId, checksum
+                        );
+
+                        let existing_image = sqlx::query!(
+                            "SELECT link FROM ServerPicture WHERE serverId = ? ORDER BY changedAt DESC LIMIT 1",
+                            entry.serverId
+                        )
+                        .fetch_one(database)
+                        .await
+                        .unwrap();
+
+                        let image_url = existing_image.link;
+
+                        let now = SystemTime::now();
+                        let dt: DateTime<Utc> = now.into();
+                        let timestamp = dt.timestamp();
+
+                        sqlx::query!(
+                            "INSERT INTO ServerPicture (checksum, serverId, changedAt, link) VALUES (?, ?, ?, ?)",
+                            checksum,
+                            entry.serverId,
+                            timestamp,
+                            image_url
+                        )
+                        .execute(database)
+                        .await
+                        .unwrap();
+                    }
+                }
+                None => {
+                    let now = SystemTime::now();
+                    let dt: DateTime<Utc> = now.into();
+                    let timestamp = dt.timestamp();
+
+                    println!(
+                        "Writing new server icon for {} at {} with checksum {}",
+                        entry.serverId,
+                        dt.to_rfc2822(),
+                        checksum
+                    );
+
+                    let filename = format!("server_icon_{}_{}.png", guild_id, timestamp);
+
+                    let image_url =
+                        imgbb::upload_image(bytes.to_vec(), filename, &config.imgbb_key)
+                            .await
+                            .unwrap();
+
+                    sqlx::query!(
+                        "INSERT INTO ServerPicture (checksum, serverId, changedAt, link) VALUES (?, ?, ?, ?)",
+                        checksum,
+                        entry.serverId,
+                        timestamp,
+                        image_url
+                    )
+                    .execute(database)
+                    .await
+                    .unwrap();
                 }
             }
         }
