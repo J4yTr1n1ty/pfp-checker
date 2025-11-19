@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT CASE WHEN (SELECT checksum FROM ServerPicture WHERE serverId = ? ORDER BY changedAt DESC LIMIT 1) = ? THEN 1 ELSE 0 END AS equals",
+  "describe": {
+    "columns": [
+      {
+        "name": "equals",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "045bc5883a757e75e571668e51c058a98b0e758e776105c265b4bacf443a723e"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT serverId FROM Server WHERE serverId = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "serverId",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4fe45eecdb6c16a61c7803cb0ac82021311a0226cc8bc5387167c4fba93124c3"
+}
