@@ -342,18 +342,22 @@ async fn fetch_server_icons(
 
     Ok(entries
         .into_iter()
-        .map(|entry| {
-            let tracking_start_date = entry.changedAt.unwrap();
-            let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0).unwrap();
-            objects::EmbedEntry {
+        .filter_map(|entry| {
+            // changedAt and checksum are in PRIMARY KEY, so they're NOT NULL
+            let tracking_start_date = entry.changedAt?;
+            let checksum = entry.checksum?;
+            let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0)?;
+
+            // link can be NULL, so provide a fallback
+            let link = entry
+                .link
+                .unwrap_or_else(|| "No link available".to_string());
+
+            Some(objects::EmbedEntry {
                 title: format!("<t:{}:F>", dt.timestamp()),
-                content: format!(
-                    "[Link]({})\nChecksum: {}",
-                    entry.link.unwrap(),
-                    entry.checksum.unwrap()
-                ),
+                content: format!("[Link]({})\nChecksum: {}", link, checksum),
                 inline: false,
-            }
+            })
         })
         .collect())
 }

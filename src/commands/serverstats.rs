@@ -51,30 +51,29 @@ pub async fn run(
 
             match icons {
                 Ok(entries) => {
-                    let mut total_duration = Duration::zero(); // Total duration of all changes
-                    let mut count = 0; // Number of server icon changes
+                    let change_count = entries.len();
 
-                    for entry in &entries {
-                        // Convert the i64 timestamp to DateTime<Utc>
-                        let dt = DateTime::<Utc>::from_timestamp(entry.changedAt.unwrap(), 0)
-                            .expect("Invalid timestamp");
+                    if change_count > 1 {
+                        // Total duration between consecutive icon changes (newest → oldest)
+                        let mut total_duration = Duration::zero();
 
-                        if count > 0 {
-                            // Calculate the duration between the current and previous entry
-                            let prev_entry = &entries[count - 1];
-                            // Use expect to handle the Option, providing a reason for potential panics
-                            let prev_dt =
-                                DateTime::<Utc>::from_timestamp(prev_entry.changedAt.unwrap(), 0)
+                        for window in entries.windows(2) {
+                            let newer = &window[0];
+                            let older = &window[1];
+
+                            let newer_dt =
+                                DateTime::<Utc>::from_timestamp(newer.changedAt.unwrap(), 0)
                                     .expect("Invalid timestamp");
-                            let duration = dt.signed_duration_since(prev_dt);
+                            let older_dt =
+                                DateTime::<Utc>::from_timestamp(older.changedAt.unwrap(), 0)
+                                    .expect("Invalid timestamp");
+
+                            let duration = newer_dt.signed_duration_since(older_dt);
                             total_duration += duration;
                         }
-                        count += 1;
-                    }
 
-                    if count > 1 {
-                        // Ensure there's more than one entry to calculate an average
-                        let average_duration = total_duration.num_seconds() as f64 / count as f64;
+                        let intervals = (change_count - 1) as f64;
+                        let average_duration = total_duration.num_seconds() as f64 / intervals;
                         // Convert the average duration to seconds for display
                         let average_duration_in_seconds = average_duration.round() as i32; // Round to the nearest whole number
 
@@ -96,7 +95,7 @@ pub async fn run(
                                 ("", "".to_string(), false), // empty row for spacing
                                 (
                                     "Changes since beginning of Monitoring",
-                                    format!("{count}"),
+                                    format!("{change_count}"),
                                     false,
                                 ),
                             ]);

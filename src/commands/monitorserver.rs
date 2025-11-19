@@ -39,24 +39,37 @@ pub async fn run(
     .await;
 
     if let Ok(record) = entry {
-        let tracking_start_date = record.trackedSince.unwrap();
-        let dt = DateTime::from_timestamp(tracking_start_date, 0).unwrap();
-
         let guild_name = interaction
             .guild_id
             .and_then(|id| ctx.cache.guild(id))
             .map(|g| g.name.clone())
             .unwrap_or_else(|| "This server".to_string());
 
+        if let Some(tracking_start_date) = record.trackedSince {
+            if let Some(dt) = DateTime::from_timestamp(tracking_start_date, 0) {
+                interaction
+                    .create_response(
+                        &ctx.http,
+                        CreateInteractionResponse::Message(
+                            CreateInteractionResponseMessage::new().content(format!(
+                                "{} is already being tracked since <t:{}:F>",
+                                guild_name,
+                                dt.timestamp()
+                            )),
+                        ),
+                    )
+                    .await?;
+                return Ok(());
+            }
+        }
+
+        // If trackedSince is NULL or invalid, respond with generic message
         interaction
             .create_response(
                 &ctx.http,
                 CreateInteractionResponse::Message(
-                    CreateInteractionResponseMessage::new().content(format!(
-                        "{} is already being tracked since <t:{}:F>",
-                        guild_name,
-                        dt.timestamp()
-                    )),
+                    CreateInteractionResponseMessage::new()
+                        .content(format!("{} is already being tracked.", guild_name)),
                 ),
             )
             .await?;
@@ -67,21 +80,34 @@ pub async fn run(
     let dt: DateTime<Utc> = now.into();
     let timestamp = dt.timestamp();
 
-    // Add the server to the database
-    sqlx::query!(
-        "INSERT INTO Server (serverId, trackedSince) VALUES (?, ?)",
-        guild_id,
-        timestamp
-    )
-    .execute(database)
-    .await
-    .unwrap();
-
     let guild_name = interaction
         .guild_id
         .and_then(|id| ctx.cache.guild(id))
         .map(|g| g.name.clone())
         .unwrap_or_else(|| "This server".to_string());
+
+    // Add the server to the database
+    let insert_result = sqlx::query!(
+        "INSERT INTO Server (serverId, trackedSince) VALUES (?, ?)",
+        guild_id,
+        timestamp
+    )
+    .execute(database)
+    .await;
+
+    if let Err(e) = insert_result {
+        eprintln!("Failed to insert server {}: {:?}", guild_id, e);
+        interaction
+            .create_response(
+                &ctx.http,
+                CreateInteractionResponse::Message(
+                    CreateInteractionResponseMessage::new()
+                        .content("Failed to add server to monitoring list. Please try again."),
+                ),
+            )
+            .await?;
+        return Ok(());
+    }
 
     // Reply with confirmation
     interaction
