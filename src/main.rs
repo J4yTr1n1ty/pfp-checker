@@ -25,7 +25,10 @@ impl EventHandler for Handler {
         match interaction {
             Interaction::Command(command) => {
                 let content = match command.data.name.as_str() {
-                    "ping" => Some(commands::ping::run(&command.data.options())),
+                    "ping" => {
+                        commands::ping::run(&ctx, &command).await.unwrap();
+                        None
+                    }
                     "monitor" => {
                         commands::monitor::run(
                             &ctx,
