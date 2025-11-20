@@ -11,6 +11,7 @@ use sha1::{Digest, Sha1};
 use crate::util::{config::Config, external::imgbb};
 
 /// Generic helper for monitoring entities (users or servers) and tracking image changes
+#[allow(clippy::too_many_arguments)]
 async fn update_monitored_entity<'a, FetchIds, GetImageUrl, FormatId>(
     client: &'a Http,
     database: &'a sqlx::SqlitePool,
