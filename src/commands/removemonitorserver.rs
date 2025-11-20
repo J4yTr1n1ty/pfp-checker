@@ -28,6 +28,24 @@ pub async fn run(
         }
     };
 
+    // Check if user has permission to manage server
+    if let Some(member) = &interaction.member {
+        if let Some(permissions) = member.permissions {
+            if !permissions.manage_guild() {
+                interaction
+                    .create_response(
+                        &ctx.http,
+                        CreateInteractionResponse::Message(
+                            CreateInteractionResponseMessage::new()
+                                .content("You need 'Manage Server' permission to use this command."),
+                        ),
+                    )
+                    .await?;
+                return Ok(());
+            }
+        }
+    }
+
     let delete_result = sqlx::query!("DELETE FROM Server WHERE serverId = ?", guild_id)
         .execute(database)
         .await;
