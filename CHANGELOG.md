@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.5.0] - Current
+## [0.5.1] - Current
+
+### Fixed
+
+- Code formatting issues in ping command
+
+## [0.5.0] - 2025-11-20
 
 ### Added
 
