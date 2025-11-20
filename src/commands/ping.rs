@@ -9,10 +9,7 @@ pub async fn run(ctx: &Context, interaction: &CommandInteraction) -> Result<(), 
     let command_timestamp = interaction.id.created_at();
     let api_latency = now.timestamp_millis() - command_timestamp.unix_timestamp() * 1000;
 
-    let response_content = format!(
-        "🏓 Pong!\n**Latency:** {}ms",
-        api_latency
-    );
+    let response_content = format!("🏓 Pong!\n**Latency:** {}ms", api_latency);
 
     interaction
         .create_response(
