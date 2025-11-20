@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT * FROM Server WHERE serverId = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "serverId",
+        "ordinal": 0,
+        "type_info": "Integer"
+      },
+      {
+        "name": "trackedSince",
+        "ordinal": 1,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "3ed28e30562fc2d6e2ffbe232e865a984086b1fbdda72f1724058d5978761234"
+}

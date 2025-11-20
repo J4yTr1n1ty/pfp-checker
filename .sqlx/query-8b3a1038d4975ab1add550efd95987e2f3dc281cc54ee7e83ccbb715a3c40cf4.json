@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT checksum, link FROM ServerPicture WHERE serverId = ? ORDER BY changedAt DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "checksum",
+        "ordinal": 0,
+        "type_info": "Text"
+      },
+      {
+        "name": "link",
+        "ordinal": 1,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "8b3a1038d4975ab1add550efd95987e2f3dc281cc54ee7e83ccbb715a3c40cf4"
+}

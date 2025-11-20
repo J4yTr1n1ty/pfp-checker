@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT checksum FROM ServerPicture WHERE serverId = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "checksum",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "70e72c4129b022ed8fd1a3d0ae78f2ef4c381a9b11e25bf76138f634e685d428"
+}

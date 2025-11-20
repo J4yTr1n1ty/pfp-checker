@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT link FROM ServerPicture WHERE serverId = ? ORDER BY changedAt DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "link",
+        "ordinal": 0,
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "4a90d3c2ea85382931198cc193b131e8237a8e784ad39de0af7f19c879bf353f"
+}

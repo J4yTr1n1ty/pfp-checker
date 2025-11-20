@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO ServerPicture (checksum, serverId, changedAt, link) VALUES (?, ?, ?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "ca01a84c313f1a141a588e68abe9ee48b00e81a8d827464038b0ac1fe0b5dd67"
+}

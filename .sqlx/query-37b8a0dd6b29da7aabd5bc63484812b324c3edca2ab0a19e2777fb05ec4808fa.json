@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO Server (serverId, trackedSince) VALUES (?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "37b8a0dd6b29da7aabd5bc63484812b324c3edca2ab0a19e2777fb05ec4808fa"
+}

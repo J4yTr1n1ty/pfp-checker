@@ -82,6 +82,32 @@ impl EventHandler for Handler {
                         .unwrap();
                         None
                     }
+                    "monitorserver" => {
+                        commands::monitorserver::run(&ctx, &command, &self.database)
+                            .await
+                            .unwrap();
+                        util::chron_update::update_monitored_servers(&ctx.http, &self.database)
+                            .await;
+                        None
+                    }
+                    "removemonitorserver" => {
+                        commands::removemonitorserver::run(&ctx, &command, &self.database)
+                            .await
+                            .unwrap();
+                        None
+                    }
+                    "serverpfphistory" => {
+                        commands::serverpfphistory::run(&ctx, &command, &self.database)
+                            .await
+                            .unwrap();
+                        None
+                    }
+                    "serverstats" => {
+                        commands::serverstats::run(&ctx, &command, &self.database)
+                            .await
+                            .unwrap();
+                        None
+                    }
                     _ => Some(format!("{} is not implemented :(", command.data.name)),
                 };
 
@@ -170,6 +196,47 @@ impl EventHandler for Handler {
                         }
                     }
                 }
+
+                if custom_id.starts_with("serverpfphistory_") {
+                    let parts: Vec<&str> = custom_id.split('_').collect();
+                    if parts.len() == 4 {
+                        let direction = parts[1];
+                        let current_page: usize = parts[2].parse().unwrap_or(0);
+                        let new_page = match direction {
+                            "back" => current_page.saturating_sub(1),
+                            "next" => current_page + 1,
+                            _ => current_page,
+                        };
+
+                        // Fetch the guild and server icons data again
+                        let guild_id = parts[3].parse::<serenity::all::GuildId>().unwrap();
+                        let guild = guild_id.to_partial_guild(&ctx.http).await.unwrap();
+                        let icons = fetch_server_icons(&self.database, i64::from(guild_id))
+                            .await
+                            .unwrap();
+
+                        let response =
+                            commands::serverpfphistory::get_paginated_embed_edit_response(
+                                &guild.name,
+                                guild_id,
+                                &icons,
+                                new_page,
+                            )
+                            .await
+                            .unwrap();
+
+                        if let Err(why) = component
+                            .create_response(&ctx.http, CreateInteractionResponse::Acknowledge)
+                            .await
+                        {
+                            println!("Cannot respond to slash command: {why}")
+                        }
+
+                        if let Err(why) = sender_message.edit(&ctx.http, response).await {
+                            println!("Cannot respond to slash command: {why}");
+                        }
+                    }
+                }
             }
             _ => {}
         }
@@ -187,6 +254,10 @@ impl EventHandler for Handler {
                 commands::pfphistory::register(),
                 commands::usernamehistory::register(),
                 commands::stats::register(),
+                commands::monitorserver::register(),
+                commands::removemonitorserver::register(),
+                commands::serverpfphistory::register(),
+                commands::serverstats::register(),
             ],
         )
         .await
@@ -202,6 +273,7 @@ impl EventHandler for Handler {
             loop {
                 interval.tick().await;
                 util::chron_update::update_monitored_users(&ctx.http, &database_clone).await;
+                util::chron_update::update_monitored_servers(&ctx.http, &database_clone).await;
             }
         });
 
@@ -253,6 +325,39 @@ async fn fetch_profile_pictures(
                 ),
                 inline: false,
             }
+        })
+        .collect())
+}
+
+async fn fetch_server_icons(
+    database: &sqlx::SqlitePool,
+    server_id: i64,
+) -> Result<Vec<objects::EmbedEntry>, sqlx::Error> {
+    let entries = sqlx::query!(
+        "SELECT * FROM ServerPicture WHERE serverId = ? ORDER BY changedAt DESC",
+        server_id
+    )
+    .fetch_all(database)
+    .await?;
+
+    Ok(entries
+        .into_iter()
+        .filter_map(|entry| {
+            // changedAt and checksum are in PRIMARY KEY, so they're NOT NULL
+            let tracking_start_date = entry.changedAt?;
+            let checksum = entry.checksum?;
+            let dt = chrono::DateTime::from_timestamp(tracking_start_date, 0)?;
+
+            // link can be NULL, so provide a fallback
+            let link = entry
+                .link
+                .unwrap_or_else(|| "No link available".to_string());
+
+            Some(objects::EmbedEntry {
+                title: format!("<t:{}:F>", dt.timestamp()),
+                content: format!("[Link]({})\nChecksum: {}", link, checksum),
+                inline: false,
+            })
         })
         .collect())
 }

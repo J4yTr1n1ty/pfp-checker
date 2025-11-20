@@ -1,6 +1,10 @@
 pub mod monitor;
+pub mod monitorserver;
 pub mod pfphistory;
 pub mod ping;
 pub mod removemonitor;
+pub mod removemonitorserver;
+pub mod serverpfphistory;
+pub mod serverstats;
 pub mod stats;
 pub mod usernamehistory;

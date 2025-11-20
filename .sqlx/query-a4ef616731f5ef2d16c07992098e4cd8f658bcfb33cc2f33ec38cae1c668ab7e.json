@@ -1,0 +1,20 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT trackedSince FROM Server WHERE serverId = ? LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "name": "trackedSince",
+        "ordinal": 0,
+        "type_info": "Integer"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a4ef616731f5ef2d16c07992098e4cd8f658bcfb33cc2f33ec38cae1c668ab7e"
+}
