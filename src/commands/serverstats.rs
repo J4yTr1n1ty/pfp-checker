@@ -103,47 +103,44 @@ pub async fn run(
                         // Respond with the average time
                         interaction
                             .create_response(
-                                &ctx,
+                                &ctx.http,
                                 CreateInteractionResponse::Message(
                                     CreateInteractionResponseMessage::new().embed(embed),
                                 ),
                             )
-                            .await
-                            .unwrap();
+                            .await?;
                     } else {
                         // Respond if there's not enough data to calculate an average
                         interaction
                             .create_response(
-                                &ctx,
+                                &ctx.http,
                                 CreateInteractionResponse::Message(
                                     CreateInteractionResponseMessage::new().content(
                                         "Not enough data to calculate average server icon changes.",
                                     ),
                                 ),
                             )
-                            .await
-                            .unwrap();
+                            .await?;
                     }
                 }
                 Err(_) => {
                     interaction
                         .create_response(
-                            &ctx,
+                            &ctx.http,
                             CreateInteractionResponse::Message(
                                 CreateInteractionResponseMessage::new().content(
                                     "No server icons have been recorded. Please wait at least 30 minutes and check again.",
                                 ),
                             ),
                         )
-                        .await
-                        .unwrap();
+                        .await?;
                 }
             }
         }
         Err(_) => {
             interaction
                 .create_response(
-                    &ctx,
+                    &ctx.http,
                     CreateInteractionResponse::Message(
                         CreateInteractionResponseMessage::new().content(format!(
                             "{} is not currently being tracked. You can add it using /monitorserver",
@@ -151,8 +148,7 @@ pub async fn run(
                         )),
                     ),
                 )
-                .await
-                .unwrap();
+                .await?;
         }
     }
     Ok(())

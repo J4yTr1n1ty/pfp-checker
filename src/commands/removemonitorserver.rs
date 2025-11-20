@@ -64,7 +64,8 @@ pub async fn run(
                     .await?;
             }
         }
-        Err(_) => {
+        Err(e) => {
+            eprintln!("Database error while deleting server {}: {:?}", guild_id, e);
             interaction
                 .create_response(
                     &ctx.http,

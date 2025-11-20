@@ -70,10 +70,17 @@ pub async fn run(
             let mut embed_entries: Vec<EmbedEntry> = Vec::new();
 
             for record in records {
-                let timestamp = record.changedAt.unwrap();
-                let dt = DateTime::from_timestamp(timestamp, 0).unwrap();
-                let checksum = record.checksum.unwrap();
-                let link = record.link.unwrap();
+                let timestamp = record
+                    .changedAt
+                    .expect("changedAt should never be NULL in ServerPicture");
+                let dt =
+                    DateTime::from_timestamp(timestamp, 0).expect("Invalid timestamp in database");
+                let checksum = record
+                    .checksum
+                    .expect("checksum should never be NULL in ServerPicture");
+                let link = record
+                    .link
+                    .expect("link should never be NULL in ServerPicture");
 
                 embed_entries.push(EmbedEntry {
                     title: format!("<t:{}:F>", dt.timestamp()),
