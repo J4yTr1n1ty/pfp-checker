@@ -238,9 +238,7 @@ pub async fn send_paginated_response(
     icons: &[EmbedEntry],
     page: usize,
 ) -> Result<(), serenity::Error> {
-    let response = get_paginated_embed_response(guild_name, guild_id, icons, page)
-        .await
-        .unwrap();
+    let response = get_paginated_embed_response(guild_name, guild_id, icons, page).await?;
 
     interaction.create_response(&ctx.http, response).await?;
 
