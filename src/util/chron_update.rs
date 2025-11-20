@@ -104,21 +104,22 @@ async fn update_monitored_entity<'a, FetchIds, GetImageUrl, FormatId>(
                         table_name, id_column_name
                     );
 
-                    let last_change_equals_now = match sqlx::query_scalar::<_, i32>(&last_check_query)
-                        .bind(entity_id)
-                        .bind(&checksum)
-                        .fetch_one(database)
-                        .await
-                    {
-                        Ok(result) => result,
-                        Err(e) => {
-                            eprintln!(
-                                "Database error checking last change for {}: {:?}",
-                                entity_id_str, e
-                            );
-                            continue;
-                        }
-                    };
+                    let last_change_equals_now =
+                        match sqlx::query_scalar::<_, i32>(&last_check_query)
+                            .bind(entity_id)
+                            .bind(&checksum)
+                            .fetch_one(database)
+                            .await
+                        {
+                            Ok(result) => result,
+                            Err(e) => {
+                                eprintln!(
+                                    "Database error checking last change for {}: {:?}",
+                                    entity_id_str, e
+                                );
+                                continue;
+                            }
+                        };
 
                     if last_change_equals_now == 1 {
                         continue;
@@ -134,20 +135,21 @@ async fn update_monitored_entity<'a, FetchIds, GetImageUrl, FormatId>(
                             table_name, id_column_name
                         );
 
-                        let existing_image = match sqlx::query_scalar::<_, Option<String>>(&link_query)
-                            .bind(entity_id)
-                            .fetch_one(database)
-                            .await
-                        {
-                            Ok(link) => link,
-                            Err(e) => {
-                                eprintln!(
-                                    "Database error fetching existing image for {}: {:?}",
-                                    entity_id_str, e
-                                );
-                                continue;
-                            }
-                        };
+                        let existing_image =
+                            match sqlx::query_scalar::<_, Option<String>>(&link_query)
+                                .bind(entity_id)
+                                .fetch_one(database)
+                                .await
+                            {
+                                Ok(link) => link,
+                                Err(e) => {
+                                    eprintln!(
+                                        "Database error fetching existing image for {}: {:?}",
+                                        entity_id_str, e
+                                    );
+                                    continue;
+                                }
+                            };
 
                         let image_url = existing_image;
 
@@ -191,8 +193,12 @@ async fn update_monitored_entity<'a, FetchIds, GetImageUrl, FormatId>(
 
                     let filename = format!("{}{}_{}.png", filename_prefix, entity_id, timestamp);
 
-                    let image_url = match imgbb::upload_image(bytes.to_vec(), filename, &config.imgbb_key)
-                        .await
+                    let image_url = match imgbb::upload_image(
+                        bytes.to_vec(),
+                        filename,
+                        &config.imgbb_key,
+                    )
+                    .await
                     {
                         Ok(url) => url,
                         Err(e) => {

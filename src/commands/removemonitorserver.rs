@@ -48,8 +48,9 @@ pub async fn run(
                     .create_response(
                         &ctx.http,
                         CreateInteractionResponse::Message(
-                            CreateInteractionResponseMessage::new()
-                                .content("You need 'Manage Server' permission to use this command."),
+                            CreateInteractionResponseMessage::new().content(
+                                "You need 'Manage Server' permission to use this command.",
+                            ),
                         ),
                     )
                     .await?;
