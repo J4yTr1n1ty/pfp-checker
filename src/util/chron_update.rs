@@ -287,6 +287,14 @@ pub async fn update_monitored_users(client: &Http, database: &sqlx::SqlitePool) 
     }
 }
 
+/// Updates server icon records for all monitored servers.
+///
+/// Fetches icon data for each server in the Server table, computes checksums,
+/// and stores new icons in the database. Uses imgbb for uploading new icons.
+///
+/// # Arguments
+/// * `client` - The Discord HTTP client
+/// * `database` - SQLite connection pool
 pub async fn update_monitored_servers(client: &Http, database: &sqlx::SqlitePool) {
     let config = Config::from_env().expect("Unable to load configuration.");
 

@@ -6,6 +6,18 @@ use serenity::prelude::*;
 
 use sqlx::SqlitePool;
 
+/// Handles the /removemonitorserver command to remove a server from the monitoring list.
+///
+/// Requires MANAGE_GUILD permission. Deletes the server entry and all associated
+/// server icon history from the database via CASCADE.
+///
+/// # Arguments
+/// * `ctx` - The Serenity context
+/// * `interaction` - The command interaction
+/// * `database` - SQLite connection pool
+///
+/// # Returns
+/// * `Result<(), serenity::Error>` - Ok if successful, error otherwise
 pub async fn run(
     ctx: &Context,
     interaction: &CommandInteraction,
@@ -99,6 +111,10 @@ pub async fn run(
     Ok(())
 }
 
+/// Registers the /removemonitorserver command with Discord.
+///
+/// # Returns
+/// * `CreateCommand` - The command builder for registration
 pub fn register() -> CreateCommand {
     CreateCommand::new("removemonitorserver")
         .description("Removes this server from the monitoring list.")

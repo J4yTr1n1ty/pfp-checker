@@ -8,6 +8,18 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 use sqlx::SqlitePool;
 
+/// Handles the /monitorserver command to add a server to the monitoring list.
+///
+/// Requires MANAGE_GUILD permission. Checks if the server is already tracked
+/// and adds it to the database with a timestamp if not.
+///
+/// # Arguments
+/// * `ctx` - The Serenity context
+/// * `interaction` - The command interaction
+/// * `database` - SQLite connection pool
+///
+/// # Returns
+/// * `Result<(), serenity::Error>` - Ok if successful, error otherwise
 pub async fn run(
     ctx: &Context,
     interaction: &CommandInteraction,
@@ -143,6 +155,10 @@ pub async fn run(
     Ok(())
 }
 
+/// Registers the /monitorserver command with Discord.
+///
+/// # Returns
+/// * `CreateCommand` - The command builder for registration
 pub fn register() -> CreateCommand {
     CreateCommand::new("monitorserver")
         .description("Adds this server to the monitoring list to track server icon changes.")

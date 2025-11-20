@@ -8,6 +8,17 @@ use serenity::all::{
 use serenity::builder::CreateCommand;
 use sqlx::SqlitePool;
 
+/// Handles the /serverstats command to display server icon change statistics.
+///
+/// Calculates and displays average time between icon changes and total change count.
+///
+/// # Arguments
+/// * `ctx` - The Serenity context
+/// * `interaction` - The command interaction
+/// * `database` - SQLite connection pool
+///
+/// # Returns
+/// * `Result<(), serenity::Error>` - Ok if successful, error otherwise
 pub async fn run(
     ctx: &Context,
     interaction: &CommandInteraction,
@@ -154,6 +165,10 @@ pub async fn run(
     Ok(())
 }
 
+/// Registers the /serverstats command with Discord.
+///
+/// # Returns
+/// * `CreateCommand` - The command builder for registration
 pub fn register() -> CreateCommand {
     CreateCommand::new("serverstats")
         .description("Shows statistics for server icon changes in this server.")

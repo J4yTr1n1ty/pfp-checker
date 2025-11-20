@@ -13,6 +13,18 @@ use crate::util::objects::EmbedEntry;
 
 const ENTRIES_PER_PAGE: usize = 10;
 
+/// Handles the /serverpfphistory command to display paginated server icon history.
+///
+/// Fetches all server icon records from the database and displays them in
+/// paginated embeds with navigation buttons.
+///
+/// # Arguments
+/// * `ctx` - The Serenity context
+/// * `interaction` - The command interaction
+/// * `database` - SQLite connection pool
+///
+/// # Returns
+/// * `Result<(), serenity::Error>` - Ok if successful, error otherwise
 pub async fn run(
     ctx: &Context,
     interaction: &CommandInteraction,
@@ -108,6 +120,16 @@ pub async fn run(
     Ok(())
 }
 
+/// Generates a paginated embed response for server icon history (for initial response).
+///
+/// # Arguments
+/// * `guild_name` - The name of the server
+/// * `guild_id` - The server's Guild ID
+/// * `icons` - Slice of icon history entries
+/// * `page` - The page number to display (0-indexed)
+///
+/// # Returns
+/// * `Result<CreateInteractionResponse, serenity::Error>` - The interaction response
 pub async fn get_paginated_embed_response(
     guild_name: &str,
     guild_id: GuildId,
@@ -149,6 +171,16 @@ pub async fn get_paginated_embed_response(
     ))
 }
 
+/// Generates a paginated embed response for server icon history (for editing existing message).
+///
+/// # Arguments
+/// * `guild_name` - The name of the server
+/// * `guild_id` - The server's Guild ID
+/// * `icons` - Slice of icon history entries
+/// * `page` - The page number to display (0-indexed)
+///
+/// # Returns
+/// * `Result<EditMessage, serenity::Error>` - The message edit builder
 pub async fn get_paginated_embed_edit_response(
     guild_name: &str,
     guild_id: GuildId,
@@ -186,6 +218,18 @@ pub async fn get_paginated_embed_edit_response(
     Ok(EditMessage::new().embed(embed).components(vec![components]))
 }
 
+/// Sends a paginated response to a command interaction.
+///
+/// # Arguments
+/// * `ctx` - The Serenity context
+/// * `interaction` - The command interaction
+/// * `guild_name` - The name of the server
+/// * `guild_id` - The server's Guild ID
+/// * `icons` - Slice of icon history entries
+/// * `page` - The page number to display (0-indexed)
+///
+/// # Returns
+/// * `Result<(), serenity::Error>` - Ok if successful, error otherwise
 pub async fn send_paginated_response(
     ctx: &Context,
     interaction: &CommandInteraction,
@@ -203,6 +247,10 @@ pub async fn send_paginated_response(
     Ok(())
 }
 
+/// Registers the /serverpfphistory command with Discord.
+///
+/// # Returns
+/// * `CreateCommand` - The command builder for registration
 pub fn register() -> CreateCommand {
     CreateCommand::new("serverpfphistory")
         .description("Displays the server icon history for this server.")
