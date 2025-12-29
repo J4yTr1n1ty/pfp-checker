@@ -17,7 +17,7 @@ sha1 = "0.10.6"
 dotenvy = "0.15.7"
 base64 = "0.22.1"
 serde = "1.0.228"
-serde_json = "1.0.145"
+serde_json = "1.0.148"
 
 [dev-dependencies]
 tempfile = "3.23.0"
