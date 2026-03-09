@@ -128,9 +128,7 @@ impl EventHandler for Handler {
                 let mut sender_message = component.message.to_owned();
                 if custom_id.starts_with("pfphistory_") {
                     if let Ok(button) = parse_pagination_button(custom_id) {
-                        let user_id = UserId::new(button.user_id);
-                        let current_page = button.current_page;
-                        let direction = button.direction.as_str();
+                        let user_id = UserId::new(button.target_id);
 
                         // Fetch the user and pfps data again
                         let user = user_id.to_user(&ctx.http).await.unwrap();
@@ -138,16 +136,7 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let total_pages = (pfps.len() as f32
-                            / commands::pfphistory::ENTRIES_PER_PAGE as f32)
-                            .ceil() as usize;
-                        let new_page = match direction {
-                            "first" => 0,
-                            "back" => current_page.saturating_sub(1),
-                            "next" => current_page + 1,
-                            "last" => total_pages.saturating_sub(1),
-                            _ => current_page,
-                        };
+                        let new_page = button.resolve_new_page(pfps.len(), commands::pfphistory::ENTRIES_PER_PAGE);
 
                         let response = commands::pfphistory::get_paginated_embed_edit_response(
                             &user, &pfps, new_page,
@@ -170,9 +159,7 @@ impl EventHandler for Handler {
 
                 if custom_id.starts_with("usernamehistory_") {
                     if let Ok(button) = parse_pagination_button(custom_id) {
-                        let user_id = UserId::new(button.user_id);
-                        let current_page = button.current_page;
-                        let direction = button.direction.as_str();
+                        let user_id = UserId::new(button.target_id);
 
                         // Fetch the user and pfps data again
                         let user = user_id.to_user(&ctx.http).await.unwrap();
@@ -180,16 +167,7 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let total_pages = (pfps.len() as f32
-                            / commands::usernamehistory::ENTRIES_PER_PAGE as f32)
-                            .ceil() as usize;
-                        let new_page = match direction {
-                            "first" => 0,
-                            "back" => current_page.saturating_sub(1),
-                            "next" => current_page + 1,
-                            "last" => total_pages.saturating_sub(1),
-                            _ => current_page,
-                        };
+                        let new_page = button.resolve_new_page(pfps.len(), commands::usernamehistory::ENTRIES_PER_PAGE);
 
                         let response =
                             commands::usernamehistory::get_paginated_embed_edit_response(
@@ -213,9 +191,7 @@ impl EventHandler for Handler {
 
                 if custom_id.starts_with("serverpfphistory_") {
                     if let Ok(button) = parse_pagination_button(custom_id) {
-                        let guild_id = serenity::all::GuildId::new(button.user_id);
-                        let current_page = button.current_page;
-                        let direction = button.direction.as_str();
+                        let guild_id = serenity::all::GuildId::new(button.target_id);
 
                         // Fetch the guild and server icons data again
                         let guild = guild_id.to_partial_guild(&ctx.http).await.unwrap();
@@ -223,16 +199,7 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let total_pages = (icons.len() as f32
-                            / commands::serverpfphistory::ENTRIES_PER_PAGE as f32)
-                            .ceil() as usize;
-                        let new_page = match direction {
-                            "first" => 0,
-                            "back" => current_page.saturating_sub(1),
-                            "next" => current_page + 1,
-                            "last" => total_pages.saturating_sub(1),
-                            _ => current_page,
-                        };
+                        let new_page = button.resolve_new_page(icons.len(), commands::serverpfphistory::ENTRIES_PER_PAGE);
 
                         let response =
                             commands::serverpfphistory::get_paginated_embed_edit_response(
