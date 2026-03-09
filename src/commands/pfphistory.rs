@@ -135,12 +135,20 @@ pub async fn get_paginated_embed_edit_response(
         )));
 
     let components = CreateActionRow::Buttons(vec![
+        CreateButton::new(format!("pfphistory_first_{}", user.id))
+            .label("First")
+            .style(ButtonStyle::Primary)
+            .disabled(page == 0),
         CreateButton::new(format!("pfphistory_back_{}_{}", page, user.id))
             .label("Back")
             .style(ButtonStyle::Primary)
             .disabled(page == 0),
         CreateButton::new(format!("pfphistory_next_{}_{}", page, user.id))
             .label("Next")
+            .style(ButtonStyle::Primary)
+            .disabled(end == pfps.len()),
+        CreateButton::new(format!("pfphistory_last_{}", user.id))
+            .label("Last")
             .style(ButtonStyle::Primary)
             .disabled(end == pfps.len()),
     ]);
@@ -171,12 +179,20 @@ pub async fn get_paginated_embed_response(
         )));
 
     let components = CreateActionRow::Buttons(vec![
+        CreateButton::new(format!("pfphistory_first_{}", user.id))
+            .label("First")
+            .style(ButtonStyle::Primary)
+            .disabled(page == 0),
         CreateButton::new(format!("pfphistory_back_{}_{}", page, user.id))
             .label("Back")
             .style(ButtonStyle::Primary)
             .disabled(page == 0),
         CreateButton::new(format!("pfphistory_next_{}_{}", page, user.id))
             .label("Next")
+            .style(ButtonStyle::Primary)
+            .disabled(end == pfps.len()),
+        CreateButton::new(format!("pfphistory_last_{}", user.id))
+            .label("Last")
             .style(ButtonStyle::Primary)
             .disabled(end == pfps.len()),
     ]);
