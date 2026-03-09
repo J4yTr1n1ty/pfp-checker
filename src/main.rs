@@ -7,6 +7,7 @@ use std::sync::Arc;
 use tokio::task;
 use util::config::Config;
 use util::objects;
+use util::pagination::parse_pagination_button;
 
 use serenity::async_trait;
 use serenity::builder::{CreateInteractionResponse, CreateInteractionResponseMessage};
@@ -126,22 +127,17 @@ impl EventHandler for Handler {
                 let custom_id = &component.data.custom_id;
                 let mut sender_message = component.message.to_owned();
                 if custom_id.starts_with("pfphistory_") {
-                    let parts: Vec<&str> = custom_id.split('_').collect();
-                    if parts.len() == 4 {
-                        let direction = parts[1];
-                        let current_page: usize = parts[2].parse().unwrap_or(0);
-                        let new_page = match direction {
-                            "back" => current_page.saturating_sub(1),
-                            "next" => current_page + 1,
-                            _ => current_page,
-                        };
+                    if let Ok(button) = parse_pagination_button(custom_id) {
+                        let user_id = UserId::new(button.target_id);
 
                         // Fetch the user and pfps data again
-                        let user_id = parts[3].parse::<UserId>().unwrap();
                         let user = user_id.to_user(&ctx.http).await.unwrap();
                         let pfps = fetch_profile_pictures(&self.database, i64::from(user_id))
                             .await
                             .unwrap();
+
+                        let new_page = button
+                            .resolve_new_page(pfps.len(), commands::pfphistory::ENTRIES_PER_PAGE);
 
                         let response = commands::pfphistory::get_paginated_embed_edit_response(
                             &user, &pfps, new_page,
@@ -163,22 +159,19 @@ impl EventHandler for Handler {
                 }
 
                 if custom_id.starts_with("usernamehistory_") {
-                    let parts: Vec<&str> = custom_id.split('_').collect();
-                    if parts.len() == 4 {
-                        let direction = parts[1];
-                        let current_page: usize = parts[2].parse().unwrap_or(0);
-                        let new_page = match direction {
-                            "back" => current_page.saturating_sub(1),
-                            "next" => current_page + 1,
-                            _ => current_page,
-                        };
+                    if let Ok(button) = parse_pagination_button(custom_id) {
+                        let user_id = UserId::new(button.target_id);
 
                         // Fetch the user and pfps data again
-                        let user_id = parts[3].parse::<UserId>().unwrap();
                         let user = user_id.to_user(&ctx.http).await.unwrap();
                         let pfps = fetch_usernames(&self.database, i64::from(user_id))
                             .await
                             .unwrap();
+
+                        let new_page = button.resolve_new_page(
+                            pfps.len(),
+                            commands::usernamehistory::ENTRIES_PER_PAGE,
+                        );
 
                         let response =
                             commands::usernamehistory::get_paginated_embed_edit_response(
@@ -201,22 +194,19 @@ impl EventHandler for Handler {
                 }
 
                 if custom_id.starts_with("serverpfphistory_") {
-                    let parts: Vec<&str> = custom_id.split('_').collect();
-                    if parts.len() == 4 {
-                        let direction = parts[1];
-                        let current_page: usize = parts[2].parse().unwrap_or(0);
-                        let new_page = match direction {
-                            "back" => current_page.saturating_sub(1),
-                            "next" => current_page + 1,
-                            _ => current_page,
-                        };
+                    if let Ok(button) = parse_pagination_button(custom_id) {
+                        let guild_id = serenity::all::GuildId::new(button.target_id);
 
                         // Fetch the guild and server icons data again
-                        let guild_id = parts[3].parse::<serenity::all::GuildId>().unwrap();
                         let guild = guild_id.to_partial_guild(&ctx.http).await.unwrap();
                         let icons = fetch_server_icons(&self.database, i64::from(guild_id))
                             .await
                             .unwrap();
+
+                        let new_page = button.resolve_new_page(
+                            icons.len(),
+                            commands::serverpfphistory::ENTRIES_PER_PAGE,
+                        );
 
                         let response =
                             commands::serverpfphistory::get_paginated_embed_edit_response(

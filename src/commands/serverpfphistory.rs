@@ -11,7 +11,7 @@ use sqlx::SqlitePool;
 
 use crate::util::objects::EmbedEntry;
 
-const ENTRIES_PER_PAGE: usize = 10;
+pub const ENTRIES_PER_PAGE: usize = 10;
 
 /// Handles the /serverpfphistory command to display paginated server icon history.
 ///
@@ -154,12 +154,20 @@ pub async fn get_paginated_embed_response(
         )));
 
     let components = CreateActionRow::Buttons(vec![
+        CreateButton::new(format!("serverpfphistory_first_{}", guild_id))
+            .label("First")
+            .style(ButtonStyle::Primary)
+            .disabled(page == 0),
         CreateButton::new(format!("serverpfphistory_back_{}_{}", page, guild_id))
             .label("Back")
             .style(ButtonStyle::Primary)
             .disabled(page == 0),
         CreateButton::new(format!("serverpfphistory_next_{}_{}", page, guild_id))
             .label("Next")
+            .style(ButtonStyle::Primary)
+            .disabled(end == icons.len()),
+        CreateButton::new(format!("serverpfphistory_last_{}", guild_id))
+            .label("Last")
             .style(ButtonStyle::Primary)
             .disabled(end == icons.len()),
     ]);
@@ -205,12 +213,20 @@ pub async fn get_paginated_embed_edit_response(
         )));
 
     let components = CreateActionRow::Buttons(vec![
+        CreateButton::new(format!("serverpfphistory_first_{}", guild_id))
+            .label("First")
+            .style(ButtonStyle::Primary)
+            .disabled(page == 0),
         CreateButton::new(format!("serverpfphistory_back_{}_{}", page, guild_id))
             .label("Back")
             .style(ButtonStyle::Primary)
             .disabled(page == 0),
         CreateButton::new(format!("serverpfphistory_next_{}_{}", page, guild_id))
             .label("Next")
+            .style(ButtonStyle::Primary)
+            .disabled(end == icons.len()),
+        CreateButton::new(format!("serverpfphistory_last_{}", guild_id))
+            .label("Last")
             .style(ButtonStyle::Primary)
             .disabled(end == icons.len()),
     ]);
