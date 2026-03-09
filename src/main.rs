@@ -208,23 +208,23 @@ impl EventHandler for Handler {
                 }
 
                 if custom_id.starts_with("serverpfphistory_") {
-                    let parts: Vec<&str> = custom_id.split('_').collect();
-                    if parts.len() == 4 {
-                        let direction = parts[1];
-                        let current_page: usize = parts[2].parse().unwrap_or(0);
+                    if let Ok(button) = parse_pagination_button(custom_id) {
+                        let guild_id = serenity::all::GuildId::new(button.user_id);
+                        let current_page = button.current_page;
+                        let direction = button.direction.as_str();
 
                         // Fetch the guild and server icons data again
-                        let guild_id = parts[3].parse::<serenity::all::GuildId>().unwrap();
                         let guild = guild_id.to_partial_guild(&ctx.http).await.unwrap();
                         let icons = fetch_server_icons(&self.database, i64::from(guild_id))
                             .await
                             .unwrap();
 
+                        let total_pages = (icons.len() as f32 / commands::serverpfphistory::ENTRIES_PER_PAGE as f32).ceil() as usize;
                         let new_page = match direction {
                             "first" => 0,
                             "back" => current_page.saturating_sub(1),
                             "next" => current_page + 1,
-                            "last" => icons.len() - 1,
+                            "last" => total_pages.saturating_sub(1),
                             _ => current_page,
                         };
 
