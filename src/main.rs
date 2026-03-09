@@ -136,7 +136,8 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let new_page = button.resolve_new_page(pfps.len(), commands::pfphistory::ENTRIES_PER_PAGE);
+                        let new_page = button
+                            .resolve_new_page(pfps.len(), commands::pfphistory::ENTRIES_PER_PAGE);
 
                         let response = commands::pfphistory::get_paginated_embed_edit_response(
                             &user, &pfps, new_page,
@@ -167,7 +168,10 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let new_page = button.resolve_new_page(pfps.len(), commands::usernamehistory::ENTRIES_PER_PAGE);
+                        let new_page = button.resolve_new_page(
+                            pfps.len(),
+                            commands::usernamehistory::ENTRIES_PER_PAGE,
+                        );
 
                         let response =
                             commands::usernamehistory::get_paginated_embed_edit_response(
@@ -199,7 +203,10 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let new_page = button.resolve_new_page(icons.len(), commands::serverpfphistory::ENTRIES_PER_PAGE);
+                        let new_page = button.resolve_new_page(
+                            icons.len(),
+                            commands::serverpfphistory::ENTRIES_PER_PAGE,
+                        );
 
                         let response =
                             commands::serverpfphistory::get_paginated_embed_edit_response(
