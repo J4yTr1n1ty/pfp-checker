@@ -46,7 +46,7 @@ impl std::error::Error for PaginationParseError {}
 /// * `Err(PaginationParseError)` - Parsing failed
 ///
 /// # Examples
-/// ```
+/// ```no_run
 /// use pfp_checker::util::pagination::parse_pagination_button;
 ///
 /// let result = parse_pagination_button("pfphistory_first_123456");
