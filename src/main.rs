@@ -138,7 +138,7 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let total_pages = (pfps.len() as f32 / 10.0).ceil() as usize;
+                        let total_pages = (pfps.len() as f32 / commands::pfphistory::ENTRIES_PER_PAGE as f32).ceil() as usize;
                         let new_page = match direction {
                             "first" => 0,
                             "back" => current_page.saturating_sub(1),
@@ -178,7 +178,7 @@ impl EventHandler for Handler {
                             .await
                             .unwrap();
 
-                        let total_pages = (pfps.len() as f32 / 10.0).ceil() as usize;
+                        let total_pages = (pfps.len() as f32 / commands::usernamehistory::ENTRIES_PER_PAGE as f32).ceil() as usize;
                         let new_page = match direction {
                             "first" => 0,
                             "back" => current_page.saturating_sub(1),
