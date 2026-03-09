@@ -143,6 +143,10 @@ pub async fn get_paginated_embed_edit_response(
             .label("Next")
             .style(ButtonStyle::Primary)
             .disabled(end == pfps.len()),
+        CreateButton::new(format!("usernamehistory_last_{}", user.id))
+            .label("Last")
+            .style(ButtonStyle::Primary)
+            .disabled(end == pfps.len()),
     ]);
 
     Ok(EditMessage::new().embed(embed).components(vec![components]))

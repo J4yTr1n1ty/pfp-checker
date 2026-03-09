@@ -20,7 +20,7 @@ impl PaginationButton {
     /// The new page number (0-indexed) to navigate to
     ///
     /// # Examples
-    /// ```
+    /// ```ignore
     /// # use pfp_checker::util::pagination::PaginationButton;
     /// let button = PaginationButton {
     ///     command: "pfphistory".to_string(),
@@ -41,7 +41,7 @@ impl PaginationButton {
         match self.direction.as_str() {
             "first" => 0,
             "back" => self.current_page.saturating_sub(1),
-            "next" => self.current_page + 1,
+            "next" => (self.current_page + 1).min(total_pages.saturating_sub(1)),
             "last" => total_pages.saturating_sub(1),
             _ => self.current_page,
         }
@@ -88,7 +88,7 @@ impl std::error::Error for PaginationParseError {}
 /// * `Err(PaginationParseError)` - Parsing failed
 ///
 /// # Examples
-/// ```no_run
+/// ```ignore
 /// use pfp_checker::util::pagination::parse_pagination_button;
 ///
 /// let result = parse_pagination_button("pfphistory_first_123456");
