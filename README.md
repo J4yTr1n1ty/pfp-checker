@@ -28,16 +28,21 @@ PFP Checker is a Discord bot that tracks and archives users' profile pictures, u
 ### Running with Docker (Recommended)
 
 ```bash
-# Clone the repository
-git clone https://github.com/j4ytr1n1ty/pfp-checker.git
-cd pfp-checker
+# Create a directory for the bot
+mkdir pfp-checker && cd pfp-checker
+
+# Download the production compose file
+curl -o docker-compose.yml https://raw.githubusercontent.com/j4ytr1n1ty/pfp-checker/main/docker-compose.production.yml
 
 # Create and configure your .env file
-cp .env.example .env
-# Edit the .env file with your Discord token and ImgBB API key
+cat > .env << 'EOF'
+DISCORD_TOKEN=your_discord_token_here
+IMGBB_API_KEY=your_imgbb_api_key_here
+EOF
+# Edit the .env file with your actual credentials
 
-# Start the bot with Docker Compose
-docker-compose up -d
+# Start the bot
+docker compose up -d
 ```
 
 ### Manual Installation
@@ -76,12 +81,12 @@ cargo build --release
 
 ### Server Tracking
 
-| Command                  | Description                                            |
-| ------------------------ | ------------------------------------------------------ |
-| `/monitorserver`         | Start tracking this server's icon changes              |
-| `/removemonitorserver`   | Stop tracking this server's icon changes               |
-| `/serverpfphistory`      | View this server's icon history                        |
-| `/serverstats`           | Show statistics about this server's icon changes       |
+| Command                | Description                                      |
+| ---------------------- | ------------------------------------------------ |
+| `/monitorserver`       | Start tracking this server's icon changes        |
+| `/removemonitorserver` | Stop tracking this server's icon changes         |
+| `/serverpfphistory`    | View this server's icon history                  |
+| `/serverstats`         | Show statistics about this server's icon changes |
 
 ### General
 
